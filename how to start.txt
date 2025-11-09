@@ -1,0 +1,3 @@
+Abrir cmd na pasta Project
+venv\Scripts\activate
+uvicorn backend.app:app --reload

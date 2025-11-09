@@ -1,0 +1,381 @@
+/* === GRID LAYOUT === */
+.upload-hero {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  justify-items: center;
+  gap: 3rem;
+  padding: 2.5rem 2rem 9rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Fade-in by section */
+.fade-section {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.9s ease forwards;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === CENTER COLUMN === */
+.upload-center {
+  text-align: center;
+}
+
+.upload-header {
+  margin-bottom: 2.8rem;
+}
+
+.upload-header h2 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  color: #2e6a84;
+  margin-bottom: 0.6rem;
+}
+
+.upload-header p {
+  color: #475569;
+  max-width: 580px;
+  margin: 0 auto 0.5rem;
+}
+
+.upload-tagline {
+  color: #64748b;
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+/* === GLASSY UPLOAD CARD === */
+.upload-card {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 18px;
+  box-shadow: 0 6px 24px rgba(46,106,132,0.12);
+  border: 1px solid rgba(255,255,255,0.35);
+  padding: 2rem 2rem;
+  transition: all 0.3s ease;
+}
+
+.upload-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(46,106,132,0.18);
+}
+
+/* === UPLOAD BOX === */
+.upload-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
+.upload-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 560px;
+  height: 250px;
+  border-radius: 18px;
+  border: 2px dashed rgba(46,106,132,0.25);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  transition: all 0.25s ease;
+  cursor: pointer;
+  text-align: center;
+  transform: translateY(13px); 
+}
+
+.upload-box:hover {
+  border-color: #2e6a84;
+  background: rgba(255, 255, 255, 0.7);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(46,106,132,0.12);
+}
+
+.upload-icon svg {
+  width: 46px;
+  height: 46px;
+  opacity: 0.85;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.upload-box:hover .upload-icon svg {
+  transform: translateY(-4px);
+  opacity: 1;
+}
+
+/* Drag state */
+.upload-area.dragover .upload-box {
+  border-color: #2e6a84;
+  box-shadow: 0 0 18px rgba(46,106,132,0.3);
+  background: rgba(255,255,255,0.85);
+}
+
+.file-note {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+/* HERO container, mantém o fundo global intacto */
+.hero {
+  position: relative;
+  text-align: center;
+  margin-bottom: 2.6rem;
+  isolation: isolate;
+}
+
+/* microtag pequeno acima do título */
+.microtag {
+  display: inline-block;
+  padding: 0.28rem 0.6rem;
+  border: 1px solid rgba(46,106,132,0.18);
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(8px);
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  font-family: "Poppins", sans-serif;
+  color: #2e6a84;
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+/* título com leve gradiente no texto */
+.hero-title {
+  font-size: clamp(2.2rem, 3.6vw + 1rem, 3.2rem);
+  line-height: 1.18;
+  font-weight: 800;
+  margin: 0.6rem 0 0.4rem;
+  background: linear-gradient(180deg, #2e6a84 0%, #23495c 100%);
+  font-family: 'Poppins', sans-serif;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.01em;
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.hero-tagline {
+  color: #64748b;
+  font-size: 0.98rem;
+  font-style: italic;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* divisor fininho para fechar o bloco do hero */
+.hero-divider {
+  display: block;
+  width: 220px;
+  height: 1px;
+  margin: 1.1rem auto 0;
+  background: linear-gradient(90deg, rgba(203,213,225,0) 0%, rgba(203,213,225,1) 50%, rgba(203,213,225,0) 100%);
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+/* estados visíveis aplicados via JS */
+.hero .show {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* transições suaves e um toque de nitidez no título */
+.microtag,
+.hero-title,
+.hero-tagline,
+.hero-divider {
+  transition: opacity 700ms ease, transform 700ms ease, letter-spacing 700ms ease;
+}
+
+/* pequeno truque de letter spacing no título na hora que aparece */
+.hero-title.show {
+  letter-spacing: 0em;
+}
+
+/* === SIDE PANELS === */
+
+.side-panel {
+  position: relative;
+  max-width: 280px;
+  padding: 0.5rem 0.25rem;
+  margin-top: 8rem;
+}
+
+.side-panel.left { margin-right: 1rem; text-align: left; }
+.side-panel.right { margin-left: 1rem; text-align: right; }
+
+/* Title */
+.side-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2e6a84;
+  margin-bottom: 1.2rem;
+  opacity: .9;
+}
+
+/* List */
+.side-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.8rem;
+}
+
+/* Vertical line */
+.side-panel::before {
+  content: "";
+  position: absolute;
+  top: 90px;
+  width: 2px;
+  height: 0;
+  background: linear-gradient(to bottom,
+    rgba(46,106,132,0),
+    rgba(46,106,132,.22) 12%,
+    rgba(46,106,132,.22) 88%,
+    rgba(46,106,132,0)
+  );
+  border-radius: 2px;
+  opacity: 0;
+  animation: growLine 3s ease forwards;
+  animation-delay: 1.5s;
+}
+.side-panel.left::before { left: 22px; }
+.side-panel.right::before { right: 22px; }
+
+@keyframes growLine {
+  from { height: 0; opacity: 0; }
+  to { height: calc(100% - 120px); opacity: 1; }
+}
+
+/* Items */
+.side-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  align-items: center;
+  gap: 0.9rem;
+  opacity: 0;
+  transform: translateY(15px);
+  animation: fadeUp 0.6s ease forwards;
+}
+.side-panel.right .side-item {
+  grid-template-columns: 1fr 36px;
+}
+
+.side-item:nth-child(1){ animation-delay: 1.6s; }
+.side-item:nth-child(2){ animation-delay: 2.0s; }
+.side-item:nth-child(3){ animation-delay: 2.4s; }
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Node circles */
+.side-node {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.95);
+  border: 1px solid rgba(46,106,132,.14);
+  box-shadow: 0 2px 10px rgba(46,106,132,.08);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  transition: all 0.25s ease;
+  transform: scale(0.4);
+  opacity: 0;
+  animation: popIn 0.4s ease forwards;
+}
+.side-item:nth-child(1) .side-node { animation-delay: 1.7s; }
+.side-item:nth-child(2) .side-node { animation-delay: 2.1s; }
+.side-item:nth-child(3) .side-node { animation-delay: 2.5s; }
+
+@keyframes popIn {
+  0%   { transform: scale(0.4); opacity: 0; }
+  70%  { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Text */
+.side-text {
+  font-weight: 600;
+  color: #0f172a;
+  font-size: .98rem;
+  transition: color 0.2s ease;
+}
+
+/* Hover */
+.side-item:hover .side-node {
+  transform: translateY(-3px) scale(1.08);
+  box-shadow: 0 4px 14px rgba(46,106,132,0.1);
+  border-color: rgba(46,106,132,0.25);
+}
+.side-item:hover .side-text {
+  color: #2e6a84;
+  letter-spacing: 0.01em;
+}
+
+/* Active (for right steps) */
+.side-item.active .side-node {
+  background: rgba(46,106,132,.8);
+  border-color: rgba(46,106,132,.4);
+  box-shadow: 0 0 0 3px rgba(46,106,132,.08);
+  color: white;
+}
+
+/* === UPLOADING FEEDBACK === */
+.uploading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  font-weight: 600;
+  color: #2e6a84;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.75; transform: scale(1.03); }
+}
+
+/* Dots animation */
+.uploading .dot {
+  animation: blink 1.4s infinite;
+}
+
+.uploading .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.uploading .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-2px); }
+}
+
+/* Optional: background wrapper if you want it centered */
+#upload-feedback {
+  text-align: center;
+  margin-top: 1.5rem;
+}

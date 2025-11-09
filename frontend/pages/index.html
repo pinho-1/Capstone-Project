@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/index.css') }}">
+{% endblock %}
+{% block content %}
+
+
+{% if updated %}
+  <div class="flash success">Your preferences have been updated successfully ✅</div>
+{% elif welcome %}
+  {% if user and user.goal == "Improve my CV" %}
+    <div class="flash success">Welcome 👋 Ready to perfect your CV?</div>
+  {% elif user and user.goal == "Prepare for interviews" %}
+    <div class="flash success">Welcome👋 Let’s get you ready to crush that next interview.</div>
+  {% elif user and user.goal == "Find new opportunities" %}
+    <div class="flash success">Welcome 👋 Time to discover your next big opportunity.</div>
+  {% else %}
+    <div class="flash success">Welcome, {{ welcome }} 👋</div>
+  {% endif %}
+{% elif goodbye %}
+  <div class="flash bye">Goodbye, {{ goodbye }} 👋</div>
+{% endif %}
+
+
+<!-- HERO SECTION -->
+<section class="hero">
+  <div class="hero-text">
+    {% if user %}
+      {% if user.goal == "Improve my CV" %}
+        <h1>Next stop:<br><span>a winning CV</span></h1>
+        <p>Let’s make your resume stand out and open new doors.</p>
+
+        <div class="hero-buttons">
+          <a id="journey-btn" href="/dashboard" class="btn primary">Continue Your Journey</a>
+          <a href="/cv" class="btn secondary">Optimize My CV</a>
+        </div>
+
+      {% elif user.goal == "Prepare for interviews" %}
+        <h1>Next stop:<br><span>your dream role</span></h1>
+        <p>Let’s get you ready to ace your next interview with confidence.</p>
+
+        <div class="hero-buttons">
+          <a id="journey-btn" href="/dashboard" class="btn primary">Continue Your Journey</a>
+          <a href="/interviews" class="btn secondary">Start Practicing</a>
+        </div>
+
+      {% elif user.goal == "Find new opportunities" %}
+        <h1>Next stop:<br><span>your next big break</span></h1>
+        <p>Let’s help you find roles that fit your goals and potential.</p>
+
+        <div class="hero-buttons">
+          <a id="journey-btn" href="/dashboard" class="btn primary">Continue Your Journey</a>
+          <a href="/jobs" class="btn secondary">Find Opportunities</a>
+        </div>
+
+      {% else %}
+        <h1>Next stop:<br><span>your dream job</span></h1>
+        <p>Your AI-powered mentor for smarter CVs, interviews, and career growth.</p>
+
+        <div class="hero-buttons">
+          <a id="journey-btn" href="/dashboard" class="btn primary">Continue Your Journey</a>
+          <a href="/chat" class="btn secondary">Go to Chatbot</a>
+        </div>
+      {% endif %}
+    {% else %}
+      <h1>Next stop:<br><span>your dream job</span></h1>
+      <p>Your AI-powered mentor for smarter CVs, interviews, and career growth.</p>
+
+      <div class="hero-buttons">
+        <a id="journey-btn" href="/auth" class="btn primary">Start Your Journey</a>
+        <a href="/chat" class="btn secondary">Explore the Chatbot</a>
+      </div>
+    {% endif %}
+  </div>
+    <div class="scroll-indicator">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#2e6a84" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down">
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+  </div>
+</section>
+  
+<!-- FEATURES -->
+<section id="features" class="features">
+  <div class="features-container">
+    <div class="feature">
+      <div class="feature-image">
+        <img src="{{ url_for('static', path='/img/feature-cv.jpg') }}" alt="CV Optimization">
+      </div>
+      <div class="feature-text">
+        <h3>CV Optimization</h3>
+        <p>Refine your CV with AI-powered insights that highlight your strengths and industry-relevant skills.</p>
+        <a href="/upload" class="feature-btn">Improve your CV</a>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="feature-image">
+        <img src="{{ url_for('static', path='/img/feature-interview.jpg') }}" alt="Interview Practice">
+      </div>
+      <div class="feature-text">
+        <h3>Interview Practice</h3>
+        <p>Simulate interviews in real time and receive personalized feedback to boost your confidence.</p>
+        <a href="/upload" class="feature-btn">Prepare your next interview</a>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="feature-image">
+        <img src="{{ url_for('static', path='/img/feature-job.jpg') }}" alt="Job Matching">
+      </div>
+      <div class="feature-text">
+        <h3>Job Matching</h3>
+        <p>Discover companies that align with your skills, values, and career ambitions — effortlessly.</p>
+        <a href="/upload" class="feature-btn">Find the perfect job for you</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" class="how-it-works">
+  <h2 class="how-title">How It Works</h2>
+  <p class="how-subtitle">
+    Our AI-powered platform guides you from uploading your CV to landing your ideal job — in three simple steps.
+  </p>
+
+  <div class="timeline">
+    <div class="step">
+      <div class="icon"><img src="{{ url_for('static', path='/img/cv-icon.jpg') }}" alt="Upload CV"></div>
+      <h3>Upload Your CV</h3>
+      <p>Drop your CV into the platform and our AI instantly analyzes your strengths and key gaps.</p>
+    </div>
+
+     <div class="wave-connector up">
+        <svg viewBox="0 0 300 80" preserveAspectRatio="none">
+          <path d="M0,60 C100,20 200,20 300,60" />
+        </svg>
+      </div>
+    
+    <div class="step">
+      <div class="icon"><img src="{{ url_for('static', path='/img/ai-icon.png') }}" alt="Get Insights"></div>
+      <h3>Get Insights</h3>
+      <p>Receive tailored recommendations to improve your CV and prepare for interviews.</p>
+    </div>
+
+     <div class="wave-connector down">
+        <svg viewBox="0 0 300 80" preserveAspectRatio="none">
+          <path d="M0,20 C100,60 200,60 300,20" />
+        </svg>
+      </div>
+
+    <div class="step">
+      <div class="icon"><img src="{{ url_for('static', path='/img/job-icon.png') }}" alt="Find Your Match"></div>
+      <h3>Find Your Match</h3>
+      <p>Apply confidently to roles that align with your goals and strengths.</p>
+    </div>
+  </div>
+</section>
+
+<script src="{{ url_for('static', path='/js/index.js') }}"></script>
+{% endblock %}

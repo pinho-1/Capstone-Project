@@ -1,0 +1,459 @@
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: radial-gradient(circle at 15% 20%, #b7d6eb 0%, transparent 65%),
+              radial-gradient(circle at 85% 80%, #d8e9f6 0%, transparent 70%),
+              linear-gradient(to bottom, #eef6fb 0%, #ffffff 40%, #f3f4f6 100%);
+  background-attachment: fixed;
+  font-family: "Inter", sans-serif;
+  color: #111827;
+}
+
+/* Centering */
+.auth-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;              /* full viewport height */
+  overflow: hidden;           /* no scrolling */
+  padding: 0;                 /* remove unnecessary padding */
+  background-attachment: fixed; /* keeps bg stable */
+} 
+
+/* Glassy card */
+.auth-card {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  padding: 2rem 3rem 2.5rem;
+  width: 380px;
+  text-align: center;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+/* subtle upward fade-in, without altering layout centering */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Logo */
+.logo {
+  display: inline-flex;
+  align-items: center; /* keeps text aligned with icon’s base */
+  gap: 0.1rem;
+  margin-bottom: 0px;
+  cursor: default;
+}
+
+.logo-icon {
+  width: 30px;
+  height: 30px;
+  position: relative;
+  top: -1.5px; /* small manual nudge for optical alignment */
+}
+
+.logo-text {
+  font-family: 'Poppins', sans-serif;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: #2e6a84;
+  letter-spacing: -0.5px;
+}
+
+/* Title */
+.auth-card h2 {
+  font-family: 'Poppins', serif;
+  font-weight: 700;
+  font-size: 2.5rem;
+  color: rgba(17, 24, 39,0.80);
+  margin-bottom: 1rem;
+  position: relative;
+  top: -10px;
+}
+
+.login-subtitle {
+  margin-top: -0.5rem;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+  color: #64748b; /* soft neutral gray-blue */
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Form */
+.auth-form {
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.auth-form.active {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.auth-form input {
+  padding: 0.9rem 1.2rem;
+  border-radius: 9999px;
+  border: 1px solid #cbd5e1;
+  background-color: #fff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.auth-form input:focus {
+  border-color: #2e6a84;
+}
+
+/* Buttons from index theme */
+.btn {
+  padding: 0.9rem 2rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn.primary {
+  background-color: #2e6a84;
+  color: #fff;
+  border: none;
+}
+
+.btn.primary:hover {
+  background-color: #0a5473;
+  box-shadow: 0 4px 8px rgba(46, 106, 132, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Social Buttons */
+.social-login {
+  margin-top: 0rem;
+}
+
+.social-login p {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.social-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  border: 1.5px solid #d1d5db;
+  color: #374151;
+  background-color: #fff;
+  transition: all 0.3s ease;
+}
+
+.social-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+.social-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(46, 106, 132, 0.15);
+}
+
+.social-btn.google:hover {
+  border-color: #ea4335;
+  color: #ea4335;
+}
+
+.social-btn.github:hover {
+  border-color: #000;
+  color: #000;
+}
+
+/* Switch text and animated link */
+.switch-text {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  color: #4b5563;
+}
+
+.switch-link {
+  position: relative;
+  color: #2e6a84;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  display: inline-block;
+}
+
+.switch-link::after {
+  content: "";
+  position: absolute;
+  bottom: -3px; /* a little space below text */
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #8baedb;
+  transition: width 0.3s ease;
+}
+
+.switch-link:hover {
+  color: #8baedb;
+}
+
+.switch-link:hover::after {
+  width: 100%;
+}
+
+/* === BACK TO HOME LINK (fixed underline width) === */
+.back-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 2rem;
+  text-decoration: none;
+  color: #2e6a84;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  font-size: 0.95rem;
+  position: relative; /* gives ::after a reference */
+}
+
+.back-home svg {
+  transition: transform 0.3s ease;
+  position: relative;
+  top: 0.18px;
+}
+
+.back-home::after {
+  content: "";
+  position: absolute;
+  bottom: -3px; /* small gap under text */
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #8baedb;
+  transition: width 0.3s ease;
+}
+
+.back-home:hover {
+  color: #8baedb;
+}
+
+.back-home:hover svg {
+  transform: translateX(-3px);
+}
+
+.back-home:hover::after {
+  width: 100%;
+}
+
+/* === SLIDE ANIMATION STYLES === */
+.auth-form {
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.auth-form.active {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Slide keyframes */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+}
+
+/* Apply animation classes */
+.slide-in-right {
+  animation: slideInRight 0.4s ease forwards;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.4s ease forwards;
+}
+
+.slide-out-left {
+  animation: slideOutLeft 0.4s ease forwards;
+}
+
+.slide-out-right {
+  animation: slideOutRight 0.4s ease forwards;
+}
+
+/* === FLOATING FEEDBACK MESSAGE === */
+.feedback {
+  position: fixed;
+  top: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  font-size: 0.95rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  animation: fadeSlideDown 0.4s ease forwards;
+  pointer-events: none;
+}
+
+.feedback.error {
+  color: #b91c1c;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
+/* Animation for appearance */
+@keyframes fadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Animation for disappearance */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+}
+
+/* Optional helper class for triggering it */
+.feedback.fade-out {
+  animation: fadeSlideUp 0.6s ease forwards;
+}
+
+/* Password input with inline icon */
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  width: 84%;
+  padding-right: 2.75rem; /* room for the icon */
+}
+
+/* Icon button */
+.toggle-visibility {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  color: #64748b; /* neutral gray-blue */
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+}
+
+.toggle-visibility:hover { color: #2e6a84; }
+.toggle-visibility:focus-visible {
+  outline: 2px solid #8baedb;
+  outline-offset: 2px;
+}
+
+/* SVG sizing */
+.icon { width: 20px; height: 20px; }
+
+/* Password strength feedback */
+.password-feedback {
+  display: block;
+  text-align: center;
+  font-size: 0.85rem;
+  height: 1rem; /* keeps layout stable even when empty */
+  transition: color 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
+}
+
+.password-feedback.visible {
+  opacity: 1;
+}

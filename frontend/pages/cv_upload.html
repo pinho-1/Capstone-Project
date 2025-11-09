@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/cv_upload.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="upload-hero">
+
+  <!-- LEFT COLUMN — BENEFITS -->
+  <div class="side-panel left fade-section" style="--delay: 1.2s;">
+    <h4 class="side-title">Why upload your CV?</h4>
+    <ol class="side-list">
+      <li class="side-item">
+        <div class="side-node">
+          <!-- document -->
+          🧾
+        </div>
+        <p class="side-text">Understand where you stand</p>
+      </li>
+
+      <li class="side-item">
+        <div class="side-node">
+          <!-- strenght -->
+          💪
+        </div>
+        <p class="side-text">Uncover your strengths</p>
+      </li>
+
+      <li class="side-item">
+        <div class="side-node">
+          <!-- target -->
+          🎯
+        </div>
+        <p class="side-text">Improve with guidance</p>
+      </li>
+    </ol>
+  </div>
+
+
+  <!-- CENTER COLUMN — MAIN CONTENT -->
+  <div class="upload-center">
+
+    <!-- HERO -->
+    <div class="upload-header hero fade-section" style="--delay: 0s;">
+      <span class="microtag">Talentum AI CV Studio</span>
+
+      <h2 class="hero-title">
+        Refine Your CV. Redefine Your Career.
+      </h2>
+
+      <span class="upload-tagline hero-tagline">
+        Your first step toward a sharper professional story.
+      </span>
+
+      <span class="hero-divider" aria-hidden="true"></span>
+    </div>
+
+    <!-- UPLOAD BOX -->
+    <form id="upload-form" action="/cv/upload" method="post" enctype="multipart/form-data">
+      <div class="upload-card fade-section" style="--delay: 3.5s;">
+
+        <div class="upload-area">
+          <input type="file" id="cv-file" name="file" accept=".pdf" hidden>
+          <label for="cv-file" class="upload-box">
+            <div class="upload-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#2e6a84">
+                <path stroke-linecap="round" stroke-linejoin="round" 
+                      d="M4 17v1a2 2 0 002 2h12a2 2 0 002-2v-1M7 9l5-5m0 0l5 5m-5-5v12" />
+              </svg>
+            </div>
+            <p><strong>Drop your CV</strong> and let’s make it shine ✨</p>
+            <span class="file-note">PDF format only, max 10 MB</span>
+          </label>
+        </div>
+
+        <div id="upload-feedback" class="upload-feedback"></div>
+      </div>
+    </form>
+  </div>
+
+  <!-- RIGHT COLUMN — NEXT STEPS -->
+  <div class="side-panel right fade-section" style="--delay: 1.2s;">
+    <h4 class="side-title">Next Steps</h4>
+    <ol class="side-list">
+      <li class="side-item active">
+        <p class="side-text">Upload</p>
+        <div class="side-node">
+          🗂️
+        </div>
+      </li>
+
+      <li class="side-item">
+        <p class="side-text">Analyze</p>
+        <div class="side-node">
+          📊
+        </div>
+      </li>
+
+      <li class="side-item">
+        <p class="side-text">Elevate</p>
+        <div class="side-node">
+          🚀
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<script src="{{ url_for('static', path='js/cv_upload.js') }}"></script>
+{% endblock %}

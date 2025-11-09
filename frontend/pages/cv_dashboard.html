@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/cv_dashboard.css') }}">
+{% endblock %}
+{% block content %}
+
+<section class="cv-dashboard active" data-status="{{ status }}">
+  <!-- Loading overlay -->
+  <div id="loading-overlay" class="loading {% if cv.status == 'ready' %}hidden{% endif %}">
+    <div class="spinner"></div>
+    <p>Analyzing your CV...</p>
+  </div>
+
+  <!-- Header -->
+  <header class="cv-header grid-layout">
+    <div class="cv-title">
+      <h2>Refine Your CV. Redefine Your Career.</h2>
+      <p>From analysis to action, Talentum helps your CV evolve into a clear and compelling story of your career.</p>
+    </div>
+
+    <div class="cv-actions">
+      <form action="/cv/upload" method="post" enctype="multipart/form-data" class="inline-upload">
+        <label for="reupload" class="btn ghost">
+          ⟳ Re-upload CV
+        </label>
+        <input id="reupload" name="file" type="file" accept=".pdf,.doc,.docx,.txt" onchange="this.form.submit()" hidden>
+      </form>
+
+      <button id="tailor-btn" class="btn primary">🎯 Tailor for Job</button>
+    </div>
+  </header>
+
+  <!-- Main grid -->
+  <div class="cv-grid">
+    <!-- Score Panel -->
+    <aside class="cv-score-panel">
+      <div class="score-circle">
+        <svg viewBox="0 0 100 100">
+          <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#2e6a84" />
+              <stop offset="100%" stop-color="#6bb4d6" />
+            </linearGradient>
+          </defs>
+          <circle class="bg" cx="50" cy="50" r="45"></circle>
+          <circle class="progress" cx="50" cy="50" r="45"></circle>
+        </svg>
+        <span id="score-value">{{ cv.overall_score }}</span>
+      </div>
+
+      <h3>Your CV Score</h3>
+      <ul class="score-breakdown">
+        {% for key, score in {
+          '🧠 Clarity': cv.clarity_score,
+          '🎯 Impact': cv.impact_score,
+          '⚙️ Structure': cv.structure_score,
+          '✍️ Language': cv.language_score
+        }.items() %}
+        <li>
+          <div class="score-header">
+            <span>{{ key }}</span>
+            <button class="toggle-btn" aria-expanded="false">
+              <svg viewBox="0 0 24 24" width="18" height="18" stroke="#2e6a84" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+          </div>
+          <div class="bar"><div class="fill" data-target="{{ score }}"></div></div>
+          <div class="reason hidden">{{ cv.reasons[key.lower()] | safe }}</div>
+        </li>
+        {% endfor %}
+      </ul>
+    </aside>
+
+    <!-- Middle: Mentor Insights -->
+    <section class="cv-insights">
+      <div class="mentor-intro">
+        <h3>Your AI Career Mentor</h3>
+        <p>Here’s what Talentum noticed in your CV — personalized insights designed to help you strengthen your professional story.</p>
+      </div>
+
+      {% if cv.mentor_summary %}
+      <div id="mentor-feedback">
+        <!-- Overview summary -->
+        <div class="feedback-item overview">
+          <h4>💬 Overall Impression</h4>
+          <p>{{ cv.mentor_summary }}</p>
+        </div>
+
+        <!-- Strengths -->
+        {% if cv.mentor_strengths %}
+        <div class="feedback-item positive">
+          <h4>✨ Strengths</h4>
+          <ul>
+            {% for s in cv.mentor_strengths %}
+            <li>{{ s }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <!-- Improvements -->
+        {% if cv.mentor_improvements %}
+        <div class="feedback-item suggestion">
+          <h4>📈 Areas for Improvement</h4>
+          <ul>
+            {% for i in cv.mentor_improvements %}
+            <li>{{ i }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <!-- Recommended focus -->
+        {% if cv.mentor_focus %}
+        <div class="feedback-item focus">
+          <h4>🎯 Recommended Focus</h4>
+          <p>{{ cv.mentor_focus }}</p>
+        </div>
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="feedback-placeholder">
+        <p>Upload your CV to receive personalized mentor insights here.</p>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- Right: AI Dynamic Mentor Panel -->
+    <aside class="cv-actions-panel" id="ai-panel">
+      <h3>Next Steps</h3>
+
+      <!-- Free-form intent -->
+      <form
+        id="intent-form"
+        hx-post="/cv/intent"
+        hx-target="#cards-stack"
+        hx-swap="beforeend"
+        hx-indicator="#ai-loading"
+      >
+        <div class="intent-input">
+          <input
+            name="intent"
+            type="text"
+            placeholder="Tell me what you want to improve… e.g., quantify my achievements"
+            required
+          />
+          <button class="btn primary" type="submit">Create</button>
+        </div>
+      </form>
+
+      <!-- Small helpers -->
+      <div class="quick-intents">
+        <button class="pill" hx-post="/cv/intent" hx-vals='{"intent":"make my summary punchier"}'
+                hx-target="#cards-stack" hx-swap="beforeend" hx-indicator="#ai-loading">Summary</button>
+        <button class="pill" hx-post="/cv/intent" hx-vals='{"intent":"add measurable impact to bullets"}'
+                hx-target="#cards-stack" hx-swap="beforeend" hx-indicator="#ai-loading">Impact</button>
+        <button class="pill" hx-post="/cv/intent" hx-vals='{"intent":"remove buzzwords and tighten language"}'
+                hx-target="#cards-stack" hx-swap="beforeend" hx-indicator="#ai-loading">Language</button>
+      </div>
+
+      <!-- Loading -->
+      <div id="ai-loading" class="htmx-indicator tiny-loading">Thinking…</div>
+
+      <!-- Stack of dynamic topic cards -->
+      <div id="cards-stack" class="cards-stack"></div>
+
+      <!-- Next Step button -->
+      <div id="next-step-wrapper" class="next-step hidden">
+        <button hx-get="/cv/next-action" hx-target="#cards-stack" hx-swap="beforeend" class="btn ghost">
+          Suggest Next Step
+        </button>
+      </div>
+    </aside>
+
+    </div>
+
+</section>
+
+<!-- Tailor Modal -->
+<div id="tailor-modal" class="modal hidden" aria-hidden="true">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Tailor Your CV for a Job</h3>
+      <button class="icon-btn" data-close>✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="jd-panel">
+        <label for="jd-text">Paste Job Description</label>
+        <textarea id="jd-text" placeholder="Paste the job posting here..."></textarea>
+      </div>
+      <div class="jd-controls">
+        <input id="jd-title" type="text" placeholder="Job Title (optional)">
+        <input id="jd-company" type="text" placeholder="Company (optional)">
+        <button id="analyze-btn" class="btn primary">Analyze Match</button>
+      </div>
+      <div id="jd-tags" class="jd-tags hidden"></div>
+      <div id="tailor-suggestions" class="cv-tailor-suggestions placeholder">
+        Paste a job description and click “Analyze Match” to see tailored recommendations.
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button id="apply-tailor" class="btn primary" disabled>Apply All</button>
+      <button class="btn ghost" data-close>Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://unpkg.com/htmx.org@1.9.6"></script>
+<script src="{{ url_for('static', path='js/cv_dashboard.js') }}"></script>
+{% endblock %}

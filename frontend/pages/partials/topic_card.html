@@ -1,0 +1,36 @@
+<article class="topic-card" id="card-{{ card.id }}">
+  <h4>{{ card.title }}</h4>
+  <div class="topic-meta">{{ card.subtitle }}</div>
+
+  <ul>
+    {% for tip in card.tips %}
+      <li>{{ tip|safe }}</li>
+    {% endfor %}
+  </ul>
+
+  {% if card.example %}
+    <div class="ai-response" style="margin-top:.6rem">
+      <strong>Example:</strong> {{ card.example|safe }}
+    </div>
+  {% endif %}
+
+  <div class="topic-actions">
+    <button class="btn ghost"
+            hx-post="/cv/card/variant"
+            hx-vals='{"card_id":"{{ card.id }}"}'
+            hx-target="#card-{{ card.id }}"
+            hx-swap="outerHTML">Another example</button>
+
+    <button class="btn primary"
+            hx-post="/cv/card/accept"
+            hx-vals='{"card_id":"{{ card.id }}"}'
+            hx-target="#card-{{ card.id }}"
+            hx-swap="outerHTML">Mark done</button>
+
+    <button class="btn ghost"
+            hx-delete="/cv/card"
+            hx-vals='{"card_id":"{{ card.id }}"}'
+            hx-target="#card-{{ card.id }}"
+            hx-swap="outerHTML">Dismiss</button>
+  </div>
+</article>

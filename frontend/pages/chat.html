@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Chat · LLM App{% endblock %}
+{% block content %}
+  <h2>Chat</h2>
+  <div id="chat" class="chat">
+    {% for m in history %}
+      <div class="msg {{ 'user' if m.sender == 'user' else 'bot' }}">{{ m.text }}</div>
+    {% endfor %}
+  </div>
+
+  <form
+    class="row" style="margin-top:12px;"
+    hx-post="/hx/chat"
+    hx-target="#chat"
+    hx-swap="beforeend"
+    hx-indicator="#htmx-indicator"
+    onsubmit="appendUser(); this.reset();"
+  >
+    <input id="msg" class="input" type="text" name="msg" placeholder="Type a message…" required />
+    <button type="submit" class="btn primary">Send</button>
+  </form>
+{% endblock %}

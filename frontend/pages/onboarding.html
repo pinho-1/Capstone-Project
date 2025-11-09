@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Talentum | Onboarding</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Playfair+Display:wght@700&family=Poppins:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', path='css/onboarding.css') }}" />
+  </head>
+
+  <body>
+    <section class="onboarding">
+      <div class="onboarding-card">
+        <h3 class="logo">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="15" width="3" height="6" rx="1" fill="#2e6a84" />
+            <rect x="9" y="10" width="3" height="11" rx="1" fill="#2e6a84" />
+            <rect x="15" y="5" width="3" height="16" rx="1" fill="#2e6a84" />
+          </svg>
+          <span class="logo-text">Ta<span>lentum</span></span>
+        </h3>
+
+        <div class="progress-bar">
+          <div class="progress"></div>
+        </div>
+
+        <div class="transition-message"></div>
+
+        <div class="steps-wrapper">
+          <div class="step active" data-step="1">
+            <h2>Every journey begins somewhere.</h2>
+            <p class="prompt">Where would you say you are in your career path right now?</p>
+            <div class="options">
+              <button class="{% if user.career_stage == 'Student' %}selected{% endif %}">Student</button>
+              <button class="{% if user.career_stage == 'Entry-level' %}selected{% endif %}">Entry-level</button>
+              <button class="{% if user.career_stage == 'Mid-career' %}selected{% endif %}">Mid-career</button>
+              <button class="{% if user.career_stage == 'Changing fields' %}selected{% endif %}">Changing fields</button>
+            </div>
+            <p class="validation-message"></p>
+          </div>
+
+          {% set interests = user.interest.split(',') if user.interest else [] %}
+
+          <div class="step" data-step="2">
+            <h2>Where do you see yourself growing?</h2>
+            <p class="prompt">Which areas feel most aligned with your interests?</p>
+
+            <div class="interest-groups">
+
+              <div class="interest-category">
+                <h3>Technology & Data</h3>
+                <div class="options">
+                  <button class="{% if 'Technology' in interests %}selected{% endif %}">Technology</button>
+                  <button class="{% if 'AI & Machine Learning' in interests %}selected{% endif %}">AI & Machine Learning</button>
+                  <button class="{% if 'Data Science' in interests %}selected{% endif %}">Data Science</button>
+                  <button class="{% if 'Cybersecurity' in interests %}selected{% endif %}">Cybersecurity</button>
+                </div>
+              </div>
+
+              <div class="interest-category">
+                <h3>Design & Creativity</h3>
+                <div class="options">
+                  <button class="{% if 'Design' in interests %}selected{% endif %}">Design</button>
+                  <button class="{% if 'UI/UX' in interests %}selected{% endif %}">UI/UX</button>
+                  <button class="{% if 'Media Production' in interests %}selected{% endif %}">Media Production</button>
+                  <button class="{% if 'Branding' in interests %}selected{% endif %}">Branding</button>
+                </div>
+              </div>
+
+              <div class="interest-category">
+                <h3>Business & Leadership</h3>
+                <div class="options">
+                  <button class="{% if 'Business' in interests %}selected{% endif %}">Business</button>
+                  <button class="{% if 'Entrepreneurship' in interests %}selected{% endif %}">Entrepreneurship</button>
+                  <button class="{% if 'Finance' in interests %}selected{% endif %}">Finance</button>
+                  <button class="{% if 'Project Management' in interests %}selected{% endif %}">Project Management</button>
+                </div>
+              </div>
+
+              <div class="interest-category">
+                <h3>People & Communication</h3>
+                <div class="options">
+                  <button class="{% if 'Marketing' in interests %}selected{% endif %}">Marketing</button>
+                  <button class="{% if 'Human Resources' in interests %}selected{% endif %}">Human Resources</button>
+                  <button class="{% if 'Public Relations' in interests %}selected{% endif %}">Public Relations</button>
+                  <button class="{% if 'Education' in interests %}selected{% endif %}">Education</button>
+                </div>
+              </div>
+
+            </div>
+            <p class="validation-message"></p>
+          </div>
+
+          <div class="step" data-step="3">
+            <h2>Everyone’s moving toward something.</h2>
+            <p class="prompt">What’s the main goal you want to focus on right now?</p>
+            <div class="options">
+              <button class="{% if user.goal == 'Improve my CV' %}selected{% endif %}">Improve my CV</button>
+              <button class="{% if user.goal == 'Prepare for interviews' %}selected{% endif %}">Prepare for interviews</button>
+              <button class="{% if user.goal == 'Find new opportunities' %}selected{% endif %}">Find new opportunities</button>
+            </div>
+            <p class="validation-message"></p>
+          </div>
+
+          <div class="step" data-step="4">
+            <h2>Experience shapes how we grow.</h2>
+            <p class="prompt">How many years of professional experience do you have?</p>
+            <input type="range" min="0" max="25" value="{{ user.experience if user.experience is not none else 2 }}" class="slider" id="experienceRange">
+            <p><span id="expValue">{{ user.experience if user.experience is not none else 2 }}</span> years</p>
+          </div>
+
+          <div class="step" data-step="5">
+            <h2>Is there something specific you’d like Talentum to help with?</h2>
+            <p class="prompt">You can share a goal, challenge, or transition you’re facing.</p>
+            <textarea placeholder="e.g. I’m looking to move into data analysis, but not sure where to start...">{{ user.focus or '' }}</textarea>
+          </div>
+
+          <div class="step" data-step="6">
+            <h2>You’ve set your direction.</h2>
+            <p>We’re shaping your Talentum experience to fit <strong>you</strong>.</p>
+            <p style="margin-top: 5rem; font-size: 0.9rem;">
+              You’ll be redirected to your home page in a few seconds.
+            </p>
+          </div>
+        </div>
+
+        <div class="nav-buttons">
+          <button class="prev" disabled>Back</button>
+          <button class="next">Next</button>
+        </div>
+      </div>
+    </section>
+
+    <script id="page-data" type="application/json">
+      {
+        "userExperience": "{{ user.experience if user and user.experience is not none else '' }}",
+        "isUpdate": {{ "true" if update_mode else "false" }}
+      }
+    </script>
+
+    <script src="{{ url_for('static', path='js/onboarding.js') }}"></script>
+  </body>
+</html>
