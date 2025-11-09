@@ -67,9 +67,13 @@ html {
 
 .hero {
   text-align: center;
-  padding: 2rem 2rem 14rem;
-  opacity: 0;
+  min-height: calc(100vh - 4rem);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   position: relative;
+  opacity: 0;
   transform: translateY(40px);
   transition: opacity 1s ease-out, transform 1.2s ease-out;
 }
@@ -160,9 +164,9 @@ a {
 
 /* === SCROLL INDICATOR === */
 .scroll-indicator {
-  position: fixed;
-  left: 49%;
-  margin-top: 9.5rem;
+  position: absolute;
+  bottom: 3rem;
+  left: 50%;
   display: flex;
   justify-content: center;
   animation: bounce 3s infinite;
@@ -182,12 +186,13 @@ a {
 }
 
 .scroll-indicator svg {
-  opacity: 0.6;
-  transition: opacity 0.3s ease;
+  opacity: 0.8;
+  transition: all 0.3s ease;
 }
 
 .scroll-indicator:hover svg {
   opacity: 1;
+  transform: scale(1.3);
 }
 
 

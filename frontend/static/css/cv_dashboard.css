@@ -25,7 +25,7 @@ body { font-family: "Inter", sans-serif; }
   width: 100%;
   max-width: 1350px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding:  calc(76px + 1.5rem) 2rem 2rem;
 }
 
 .cv-dashboard > * {
@@ -48,20 +48,24 @@ body { font-family: "Inter", sans-serif; }
 }
 
 .cv-title {
-  max-width: 800px; /* slightly wider */
+  max-width: 800px;
 }
 
 .cv-title h2 {
   color: #2e6a84;
-  font-size: 1.8rem;
+  font-size: 2.5rem;
   font-weight: 700;
-  margin-bottom: 0.3rem;
+  font-family: 'Poppins', sans-serif;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
 }
 
 .cv-title p {
-  color: #5f7280;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  color: #64748b;
+  font-size: 1rem;
+  font-style: italic;
+  margin-top: 0;
 }
 
 .cv-actions {

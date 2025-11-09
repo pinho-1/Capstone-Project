@@ -135,7 +135,19 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Scroll Indicator Click Handler
-document.querySelector(".scroll-indicator")?.addEventListener("click", () => {
-  window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
+const scroller =
+  document.querySelector('.page') || document.scrollingElement || document.documentElement;
+
+document.querySelector('.scroll-indicator')?.addEventListener('click', () => {
+  const target = document.querySelector('#features');
+  if (!target) return;
+  const navOffset = parseFloat(getComputedStyle(document.documentElement)
+                     .getPropertyValue('--nav-h')) || 80;
+  const rect = target.getBoundingClientRect();
+  scroller.scrollTo({
+    top: (scroller.scrollTop || 0) + rect.top - (navOffset - 80),
+    behavior: 'smooth'
+  });
 });
+
 
