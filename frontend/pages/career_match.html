@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Career Match · Talentum{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ url_for('static', path='css/cv_upload.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/career_match.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="cm-wrapper">
+  <header class="cm-header">
+    <div>
+      <h1>Career Match</h1>
+      <p>Search roles and instantly see how well your profile fits each opportunity.</p>
+    </div>
+    <div class="cm-header-pill">
+      <span>Using your CV + preferences</span>
+    </div>
+  </header>
+
+  <section class="cm-grid">
+    <!-- LEFT: search + job list -->
+    <aside class="cm-column cm-left">
+      <div class="cm-search-card">
+        <h2>Find roles</h2>
+        <p class="cm-search-sub">
+          Start with a job title or keywords. Later we’ll connect this to real job data.
+        </p>
+        <form class="cm-search-form"
+            hx-post="/cm/search"
+            hx-target="#cm-jobs-list"
+            hx-swap="innerHTML">
+          <div class="cm-fields">
+            <div class="cm-field">
+              <label for="cm-title">Job title or keywords</label>
+              <input id="cm-title" name="title" type="text"
+                     placeholder="e.g. Data Analyst, Product Manager" />
+            </div>
+            <div class="cm-field">
+              <label for="cm-location">Location (optional)</label>
+              <input id="cm-location" name="location" type="text"
+                     placeholder="e.g. Lisbon" />
+            </div>
+          </div>
+            <div class="cm-search-bottom">
+            <div class="cm-mode-toggle">
+                <label class="cm-mode-pill">
+                <input type="radio" name="mode" value="any" checked>
+                <span>Any</span>
+                </label>
+                <label class="cm-mode-pill">
+                <input type="radio" name="mode" value="on-site">
+                <span>On-site</span>
+                </label>
+                <label class="cm-mode-pill">
+                <input type="radio" name="mode" value="hybrid">
+                <span>Hybrid</span>
+                </label>
+                <label class="cm-mode-pill">
+                <input type="radio" name="mode" value="remote">
+                <span>Remote</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn primary cm-search-btn">
+                Search jobs
+            </button>
+            </div>
+        </form>
+      </div>
+
+        <div class="cm-jobs-card">
+        <div class="cm-jobs-header">
+            <h3>Job results</h3>
+            <span class="cm-jobs-count">No results</span>
+        </div>
+
+        <ul class="cm-jobs-list" id="cm-jobs-list">
+            <li class="cm-no-results">
+            <p>No job results yet.</p>
+            <p class="cm-no-results-sub">Start by searching with keywords above.</p>
+            </li>
+        </ul>
+        </div>
+
+    </aside>
+
+    <!-- RIGHT: match analysis panel -->
+    <main class="cm-column cm-right">
+    <div class="cm-match-card cm-match-placeholder">
+        <p>No role selected.</p>
+        <p class="cm-no-results-sub">Choose a job from the list to see your match score.</p>
+    </div>
+    </main>
+          </section>
+        </div>
+      </div>
+    </main>
+  </section>
+</section>
+{% endblock %}

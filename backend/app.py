@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
 import os
+import json
 
 load_dotenv()
 
@@ -129,6 +130,65 @@ def cv_upload_page(request: Request, db: Session = Depends(get_db)):
         return RedirectResponse("/auth?error=login_required", status_code=303)
     return templates.TemplateResponse("cv_upload.html", {"request": request, "user": user})
 
+
+
+#bruno
+@app.get("/cm", response_class=HTMLResponse)
+def career_match_page(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse("/auth?error=login_required", status_code=303)
+
+    return templates.TemplateResponse("career_match.html", {
+        "request": request,
+        "user": user
+    })
+
+
+def load_mock_jobs():
+    path = os.path.join(os.path.dirname(__file__), "data", "mock_jobs.json")
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+    
+@app.post("/cm/search", response_class=HTMLResponse)
+async def cm_search(
+    request: Request,
+    title: str = Form(""),
+    location: str = Form(""),
+    mode: str = Form("any"),
+):
+    jobs = load_mock_jobs()
+
+    title_q = title.lower().strip()
+    loc_q = location.lower().strip()
+    mode_q = mode.lower().strip()  # "any", "on-site", "hybrid", "remote"
+
+    filtered = []
+    for job in jobs:
+        # Title filter
+        if title_q and title_q not in job["title"].lower():
+            continue
+
+        # Location filter
+        if loc_q and loc_q not in job["location"].lower():
+            continue
+
+        # Mode filter
+        if mode_q != "any":
+            # job["mode"] is "Hybrid", "Remote", "On-site"
+            job_mode = job["mode"].lower()
+            if mode_q not in job_mode:
+                continue
+
+        filtered.append(job)
+
+    return templates.TemplateResponse(
+        "cm_job_results.html",
+        {
+            "request": request,
+            "jobs": filtered,
+        },
+    )
 
 
 # ---------------------
