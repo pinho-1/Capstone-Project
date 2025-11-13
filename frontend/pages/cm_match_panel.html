@@ -1,0 +1,60 @@
+{% if not job %}
+  <div class="cm-match-card cm-match-placeholder">
+    <p>Something went wrong.</p>
+    <p class="cm-no-results-sub">We couldn’t analyze this role. Please try another job.</p>
+  </div>
+{% else %}
+  <div class="cm-match-card">
+    <header class="cm-match-header">
+      <div>
+        <p class="cm-match-label">Selected role</p>
+        <h2 class="cm-match-title">
+          {{ job.title }} · {{ job.company }}
+        </h2>
+        <p class="cm-match-meta">
+          {{ job.location }} · {{ job.mode }} · {{ job.level }}
+        </p>
+      </div>
+      <div class="cm-match-score">
+        <div class="cm-match-score-number">{{ match_score }}</div>
+        <div class="cm-match-score-label">MATCH</div>
+      </div>
+    </header>
+
+    <div class="cm-badges-row">
+      <span class="cm-badge cm-badge--primary">
+        {{ seniority_fit }}
+      </span>
+      <span class="cm-badge cm-badge--neutral">
+        {{ skills_summary }}
+      </span>
+    </div>
+
+    <section class="cm-section">
+      <h3>Where you shine</h3>
+      <ul>
+        {% for s in strengths %}
+          <li>{{ s }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="cm-section">
+      <h3>To strengthen your application</h3>
+      <ul>
+        {% for g in gaps %}
+          <li>{{ g }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="cm-section">
+      <h3>Next steps</h3>
+      <ul>
+        {% for step in next_steps %}
+          <li>{{ step }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+{% endif %}
