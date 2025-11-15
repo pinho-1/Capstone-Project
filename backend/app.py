@@ -31,6 +31,9 @@ templates = Jinja2Templates(directory=os.path.join(FRONTEND_DIR, "pages"))
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(cv.router, prefix="/cv", tags=["cv"])
 
+# Get Path
+def get_current_path(request: Request):
+    return request.url.path
 
 # ---------------------
 # ROUTES
@@ -47,7 +50,8 @@ def index(request: Request, db: Session = Depends(get_db)):
         "user": user,
         "welcome": welcome,
         "goodbye": goodbye,
-        "updated": updated
+        "updated": updated,
+        "current_path": request.url.path
     })
 
 
@@ -61,7 +65,7 @@ def auth_page(request: Request, db: Session = Depends(get_db)):
 @app.get("/about", response_class=HTMLResponse)
 def about_page(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
-    return templates.TemplateResponse("about.html", {"request": request, "user": user})
+    return templates.TemplateResponse("about.html", {"request": request, "user": user, "current_path": request.url.path,})
 
 
 @app.get("/chat", response_class=HTMLResponse)
@@ -69,7 +73,7 @@ def chat_page(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
     if not user:
         return RedirectResponse("/auth?error=login_required", status_code=303)
-    return templates.TemplateResponse("chat.html", {"request": request, "user": user})
+    return templates.TemplateResponse("chat.html", {"request": request, "user": user, "current_path": request.url.path,})
 
 @app.get("/onboarding", response_class=HTMLResponse)
 def onboarding_page(request: Request, db: Session = Depends(get_db)):
@@ -80,32 +84,102 @@ def onboarding_page(request: Request, db: Session = Depends(get_db)):
 
     update_mode = request.query_params.get("update") == "true"
 
-    # Only skip onboarding if not updating
     if getattr(user, "onboarding_complete", False) and not update_mode:
         return RedirectResponse(f"/?welcome={user.name}", status_code=303)
 
     categories = [
         {
             "name": "Technology & Data",
-            "interests": ["Technology", "AI & Machine Learning", "Data Science", "Cybersecurity", "Blockchain", "Cloud Computing"]
+            "interests": [
+                "Software Development", "AI & Machine Learning", "Data Science", "Cybersecurity",
+                "Cloud Computing", "Blockchain", "IT Support", "DevOps", "Data Engineering"
+            ],
         },
         {
             "name": "Design & Creativity",
-            "interests": ["Design", "UI/UX", "Media Production", "Branding", "Game Design", "Illustration"]
+            "interests": [
+                "Graphic Design", "UI/UX", "Product Design", "Animation",
+                "Media Production", "Photography", "Illustration",
+                "Game Design", "Creative Direction"
+            ],
         },
         {
             "name": "Business & Leadership",
-            "interests": ["Business", "Entrepreneurship", "Finance", "Project Management", "Operations", "Consulting"]
+            "interests": [
+                "Business Strategy", "Entrepreneurship", "Finance",
+                "Project Management", "Operations", "Consulting",
+                "Business Analytics", "Management"
+            ],
         },
         {
             "name": "People & Communication",
-            "interests": ["Marketing", "Human Resources", "Public Relations", "Education", "Sales", "Customer Support"]
-        }
-    ]   
+            "interests": [
+                "Marketing", "Public Relations", "Human Resources",
+                "Education", "Sales", "Customer Support",
+                "Content Creation", "Community Management"
+            ],
+        },
+        {
+            "name": "Health & Life Sciences",
+            "interests": [
+                "Healthcare", "Nursing", "Pharmacy", "Biotechnology",
+                "Mental Health", "Nutrition", "Environmental Science",
+                "Public Health", "Sports Science"
+            ],
+        },
+        {
+            "name": "Engineering & Manufacturing",
+            "interests": [
+                "Mechanical Engineering", "Electrical Engineering", "Civil Engineering",
+                "Robotics", "Industrial Engineering", "Automotive",
+                "Quality Assurance", "Aerospace"
+            ],
+        },
+        {
+            "name": "Social Impact & Public Sector",
+            "interests": [
+                "Nonprofit Work", "Government", "Social Work",
+                "Policy & Advocacy", "International Relations",
+                "Community Development", "Law"
+            ],
+        },
+        {
+            "name": "Arts, Culture & Media",
+            "interests": [
+                "Writing", "Music", "Film", "Performing Arts",
+                "Cultural Studies", "History", "Journalism",
+                "Languages", "Literature"
+            ],
+        },
+        {
+            "name": "Environment & Sustainability",
+            "interests": [
+                "Environmental Engineering", "Renewable Energy",
+                "Sustainability Consulting", "Climate Science",
+                "Wildlife & Conservation", "Urban Planning"
+            ],
+        },
+    ]
+
+    # ---- split predefined vs "other" interests for this user ----
+    all_user_interests: list[str] = []
+    other_interests: list[str] = []
+
+    if user and user.interest:
+        all_user_interests = [s.strip() for s in user.interest.split(",") if s.strip()]
+        predefined_set = {i for cat in categories for i in cat["interests"]}
+        other_interests = [i for i in all_user_interests if i not in predefined_set]
 
     return templates.TemplateResponse(
         "onboarding.html",
-        {"request": request, "user": user, "update_mode": update_mode, "categories": categories}
+        {
+            "request": request,
+            "user": user,
+            "update_mode": update_mode,
+            "categories": categories,
+            "user_interests": all_user_interests,
+            "other_interests": other_interests,
+        },
     )
 
 def current_user_dep(request: Request, db: Session = Depends(get_db)):
@@ -156,7 +230,7 @@ def cv_upload_page(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
     if not user:
         return RedirectResponse("/auth?error=login_required", status_code=303)
-    return templates.TemplateResponse("cv_upload.html", {"request": request, "user": user})
+    return templates.TemplateResponse("cv_upload.html", {"request": request, "user": user, "current_path": request.url.path})
 
 
 

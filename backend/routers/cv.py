@@ -44,7 +44,7 @@ async def view_cv(request: Request, cv_id: str, db: Session = Depends(get_db)):
 
     return templates.TemplateResponse(
         "cv_dashboard.html",
-        {"request": request, "cv": cv, "user": user}
+        {"request": request, "cv": cv, "user": user, "current_path": request.url.path}
     )
 
 # ========== 1. UPLOAD & PROCESS ==========
