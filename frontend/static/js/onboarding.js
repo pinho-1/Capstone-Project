@@ -54,7 +54,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function updateSteps() {
     steps.forEach((step, i) => step.classList.toggle("active", i === current));
-    prevBtn.disabled = current === 0;
+
+    // Enable or disable Back button
+    if (current === 0) {
+      if (isUpdate) {
+        prevBtn.classList.remove('disabled');
+        prevBtn.removeAttribute("disabled");
+      } else {
+        prevBtn.classList.add('disabled');
+        prevBtn.setAttribute("disabled", "true");
+      }
+    } else {
+      prevBtn.classList.remove('disabled');
+      prevBtn.removeAttribute("disabled");
+    }
+
+    // Show Next/Previous buttons based on steps
     if (current === steps.length - 1) {
       nextBtn.style.display = "none";
       prevBtn.style.display = "none"; // hide Back button on last step
@@ -62,6 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
       nextBtn.style.display = "inline-block";
       prevBtn.style.display = "inline-block";
     }
+
     progress.style.width = ((current + 1) / steps.length) * 100 + "%";
 
     if (messageBox && messages[current]) {
@@ -148,11 +164,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   prevBtn.addEventListener("click", () => {
-    if (current > 0) {
+    if (current === 0 && isUpdate) {
+      // If we're on Step 1 in update mode, go back to the homepage
+      window.location.href = '/';
+    } else if (current > 0) {
       current--;
       updateSteps();
     }
   });
+
+
 
   range?.addEventListener("input", () => {
     expValue.textContent = range.value;

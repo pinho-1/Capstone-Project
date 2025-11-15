@@ -49,48 +49,26 @@
             <p class="prompt">Which areas feel most aligned with your interests?</p>
 
             <div class="interest-groups">
+              {% for category in categories %}
+                <div class="interest-category">
+                  <h3>{{ category.name }}</h3>
+                  <div class="options">
+                    {% for interest in category.interests %}
+                      <button class="{% if interest in user.interest.split(',') %}selected{% endif %}">{{ interest }}</button>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endfor %}
 
+              <!-- "Other" Category -->
               <div class="interest-category">
-                <h3>Technology & Data</h3>
+                <h3>Other</h3>
                 <div class="options">
-                  <button class="{% if 'Technology' in interests %}selected{% endif %}">Technology</button>
-                  <button class="{% if 'AI & Machine Learning' in interests %}selected{% endif %}">AI & Machine Learning</button>
-                  <button class="{% if 'Data Science' in interests %}selected{% endif %}">Data Science</button>
-                  <button class="{% if 'Cybersecurity' in interests %}selected{% endif %}">Cybersecurity</button>
+                  <input type="text" class="other-interest-input" name="other-interest" placeholder="Type your area..." />
                 </div>
               </div>
-
-              <div class="interest-category">
-                <h3>Design & Creativity</h3>
-                <div class="options">
-                  <button class="{% if 'Design' in interests %}selected{% endif %}">Design</button>
-                  <button class="{% if 'UI/UX' in interests %}selected{% endif %}">UI/UX</button>
-                  <button class="{% if 'Media Production' in interests %}selected{% endif %}">Media Production</button>
-                  <button class="{% if 'Branding' in interests %}selected{% endif %}">Branding</button>
-                </div>
-              </div>
-
-              <div class="interest-category">
-                <h3>Business & Leadership</h3>
-                <div class="options">
-                  <button class="{% if 'Business' in interests %}selected{% endif %}">Business</button>
-                  <button class="{% if 'Entrepreneurship' in interests %}selected{% endif %}">Entrepreneurship</button>
-                  <button class="{% if 'Finance' in interests %}selected{% endif %}">Finance</button>
-                  <button class="{% if 'Project Management' in interests %}selected{% endif %}">Project Management</button>
-                </div>
-              </div>
-
-              <div class="interest-category">
-                <h3>People & Communication</h3>
-                <div class="options">
-                  <button class="{% if 'Marketing' in interests %}selected{% endif %}">Marketing</button>
-                  <button class="{% if 'Human Resources' in interests %}selected{% endif %}">Human Resources</button>
-                  <button class="{% if 'Public Relations' in interests %}selected{% endif %}">Public Relations</button>
-                  <button class="{% if 'Education' in interests %}selected{% endif %}">Education</button>
-                </div>
-              </div>
-
             </div>
+
             <p class="validation-message"></p>
           </div>
 

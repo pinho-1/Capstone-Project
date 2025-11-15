@@ -1,0 +1,9 @@
+# Ambientes virtuais
+venv/
+__pycache__/
+
+# Configurações locais do VS Code
+.vscode/
+
+# Arquivos sensíveis
+*.db

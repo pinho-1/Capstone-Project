@@ -19,7 +19,7 @@ body {
   height: 100vh;              /* full viewport height */
   overflow: hidden;           /* no scrolling */
   padding: 0;                 /* remove unnecessary padding */
-  background-attachment: fixed; /* keeps bg stable */
+  background-attachment: fixed; /* keeps bg stable */     
 }
 
 .onboarding-card {
@@ -156,7 +156,7 @@ body {
 .interest-groups {
   display: grid;
   gap: 0.75rem;
-  max-height: 320px;
+  max-height: 340px;
   overflow-y: auto;
   padding: 0 0.5rem;
   scrollbar-width: thin;
@@ -195,6 +195,25 @@ body {
   gap: 0.5rem;
   justify-content: center;
   margin-top: 0.25rem;
+}
+
+.other-interest-input {
+  width: 50%;
+  padding: 0.6rem 1rem;
+  border: 1px solid #2e6a84;
+  border-radius: 20px; 
+  font-size: 1rem;
+  color: #2e6a84;
+  background: rgba(46, 106, 132, 0.04); 
+  margin: 0.5rem auto;
+  display: block;   
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.other-interest-input:focus {
+  border-color: #0a5473; 
+  background-color: rgba(46, 106, 132, 0.15);
+  outline: none;          
 }
 
 /* Restored the original rounded-pill button style */

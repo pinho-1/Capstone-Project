@@ -84,9 +84,28 @@ def onboarding_page(request: Request, db: Session = Depends(get_db)):
     if getattr(user, "onboarding_complete", False) and not update_mode:
         return RedirectResponse(f"/?welcome={user.name}", status_code=303)
 
+    categories = [
+        {
+            "name": "Technology & Data",
+            "interests": ["Technology", "AI & Machine Learning", "Data Science", "Cybersecurity", "Blockchain", "Cloud Computing"]
+        },
+        {
+            "name": "Design & Creativity",
+            "interests": ["Design", "UI/UX", "Media Production", "Branding", "Game Design", "Illustration"]
+        },
+        {
+            "name": "Business & Leadership",
+            "interests": ["Business", "Entrepreneurship", "Finance", "Project Management", "Operations", "Consulting"]
+        },
+        {
+            "name": "People & Communication",
+            "interests": ["Marketing", "Human Resources", "Public Relations", "Education", "Sales", "Customer Support"]
+        }
+    ]   
+
     return templates.TemplateResponse(
         "onboarding.html",
-        {"request": request, "user": user, "update_mode": update_mode}
+        {"request": request, "user": user, "update_mode": update_mode, "categories": categories}
     )
 
 def current_user_dep(request: Request, db: Session = Depends(get_db)):
@@ -103,24 +122,34 @@ def submit_onboarding(
     goal: str = Form(None),
     experience: int = Form(None),
     focus: str = Form(None),
+    other_interest: str = Form(None),
 ):
     if not user:
         return RedirectResponse("/auth?error=login_required", status_code=303)
 
+    # Combine predefined interests and custom ones
+    all_interests = interest.split(",") if interest else []
+    
+    # Add the custom "other" interest
+    if other_interest:
+        all_interests.append(other_interest.strip())
+    
+    # Save the combined interests back to the user
     user.career_stage = career_stage
-    user.interest = interest
+    user.interest = ",".join(all_interests)
     user.goal = goal
     user.experience = experience
     user.focus = focus
     user.onboarding_complete = True
     db.commit()
 
-    # Detect update mode via referrer
+    # Redirect after submitting the form
     referrer = str(request.headers.get("referer", ""))
     if "update=true" in referrer:
         return RedirectResponse("/?updated=true", status_code=303)
 
     return RedirectResponse(f"/?welcome={user.name}", status_code=303)
+
 
 @app.get("/cv", response_class=HTMLResponse)
 def cv_upload_page(request: Request, db: Session = Depends(get_db)):
