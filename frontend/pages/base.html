@@ -27,14 +27,14 @@
         <div class="nav-center">
           <ul>
             {% if user %}
-              <li><a href="/chat">Chatbot</a></li>
-              <li><a href="/cv">CV Upload</a></li>
-              <li><a href="#">Interviews</a></li>
-              <li><a href="#">Career Match</a></li>
+              <li><a href="/chat" class="nav-link {% if current_path.startswith('/chat') %}nav-link--active{% endif %}">Chatbot</a></li>
+              <li><a href="/cv" class="nav-link {% if current_path.startswith('/cv') %}nav-link--active{% endif %}">CV Upload</a></li>
+              <li><a href="#" class="nav-link {% if current_path.startswith('#') %}nav-link--active{% endif %}">Interviews</a></li>
+              <li><a href="#" class="nav-link {% if current_path.startswith('#') %}nav-link--active{% endif %}">Career Match</a></li>
             {% else %}
-              <li><a href="/about">About</a></li>
-              <li><a href="/#features">Features</a></li>
-              <li><a href="/#how-it-works">How it Works</a></li>
+              <li><a href="/about" class="nav-link {% if current_path.startswith('/about') %}nav-link--active{% endif %}">About</a></li>
+              <li><a href="/#features" class="nav-link {% if current_path.startswith('/features') %}nav-link--active{% endif %}">Features</a></li>
+              <li><a href="/#how-it-works" class="nav-link {% if current_path.startswith('/how-it-works') %}nav-link--active{% endif %}">How it Works</a></li>
             {% endif %}
           </ul>
         </div>
@@ -44,7 +44,7 @@
           {% if user %}
           <div class="profile-menu">
             <button class="profile-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#2e6a84" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#2e6a84" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                 <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5z"></path>
                 <path d="M21 21c0-4.5-4-8-9-8s-9 3.5-9 8"></path>
               </svg>
@@ -64,18 +64,18 @@
           </div>
           {% else %}
           <a href="/auth" class="guest-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
               <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5z"></path>
               <path d="M21 21c0-4.5-4-8-9-8s-9 3.5-9 8"></path>
             </svg>
-            <span>Login</span>
+            <span class="login-btn">Login</span>
           </a>
           {% endif %}
         </div>
 
       </nav>
     </header>
-
+    
     <main>
       {% block content %}{% endblock %}
     </main>

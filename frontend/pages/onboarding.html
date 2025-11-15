@@ -42,7 +42,7 @@
             <p class="validation-message"></p>
           </div>
 
-          {% set interests = user.interest.split(',') if user.interest else [] %}
+          {% set interests = user_interests if user_interests is defined else (user.interest.split(',') if user.interest else []) %}
 
           <div class="step" data-step="2">
             <h2>Where do you see yourself growing?</h2>
@@ -54,7 +54,7 @@
                   <h3>{{ category.name }}</h3>
                   <div class="options">
                     {% for interest in category.interests %}
-                      <button class="{% if interest in user.interest.split(',') %}selected{% endif %}">{{ interest }}</button>
+                      <button class="{% if interest in interests %}selected{% endif %}">{{ interest }}</button>
                     {% endfor %}
                   </div>
                 </div>
@@ -64,7 +64,13 @@
               <div class="interest-category">
                 <h3>Other</h3>
                 <div class="options">
-                  <input type="text" class="other-interest-input" name="other-interest" placeholder="Type your area..." />
+                  <input
+                    type="text"
+                    class="other-interest-input"
+                    name="other_interest"
+                    placeholder="Type your areas..."
+                    value="{{ other_interests | join(', ') if other_interests is defined else '' }}"
+                  />
                 </div>
               </div>
             </div>
