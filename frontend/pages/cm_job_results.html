@@ -1,3 +1,18 @@
+{% set count = jobs|length if jobs else 0 %}
+
+<!-- update the header counter out-of-band -->
+<span id="cm-jobs-count"
+      class="cm-jobs-count"
+      hx-swap-oob="true">
+  {% if count == 0 %}
+    No results
+  {% elif count == 1 %}
+    1 result
+  {% else %}
+    {{ count }} results
+  {% endif %}
+</span>
+
 {% if jobs and jobs|length > 0 %}
   {% for job in jobs %}
     <li class="cm-job-card">
@@ -17,7 +32,7 @@
         hx-target="#cm-match-panel"
         hx-swap="innerHTML"
         hx-vals='{"job_id": "{{ job.id }}"}'>
-          Analyze match
+        Analyze match
       </button>
     </li>
   {% endfor %}

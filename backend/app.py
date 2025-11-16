@@ -7,6 +7,7 @@ from backend.models.user_model import User, CV
 from typing import Optional, Any
 from backend.routers import auth, cv
 from backend.routers.auth import get_current_user
+from backend.services.ai.career_match import analyze_career_match
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
@@ -190,97 +191,92 @@ async def cm_search(
         },
     )
 
+
 @app.post("/cm/analyze", response_class=HTMLResponse)
 async def cm_analyze(
     request: Request,
-    job_id: str = Form(...)
+    job_id: str = Form(...),
+    db: Session = Depends(get_db),
 ):
-    # Load jobs and find the selected one
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse("/auth?error=login_required", status_code=303)
+
+    # 1. Find the selected job in mock data
     jobs = load_mock_jobs()
-    job = None
-    for j in jobs:
-        # ids in JSON are numbers, in form they come as string
-        if str(j["id"]) == str(job_id):
-            job = j
-            break
+    job = next((j for j in jobs if str(j.get("id")) == str(job_id)), None)
 
     if not job:
-        # fallback: simple error panel
+        # Something’s odd with this job id
         return templates.TemplateResponse(
             "cm_match_panel.html",
             {
                 "request": request,
                 "job": None,
-                "match_score": 0,
-                "seniority_fit": "Unknown",
-                "skills_summary": "We couldn't find this job. Please try again.",
+                "missing_cv": False,
+            },
+        )
+
+    # 2. Grab MOST RECENT valid CV for this user
+    cvs = (
+        db.query(CV)
+        .filter(
+            CV.user_id == user.id,
+            CV.raw_text != None,
+            CV.raw_text != ""
+        )
+        .order_by(CV.updated_at.desc())
+        .all()
+    )
+
+    cv = cvs[0] if cvs else None
+
+    if not cv:
+        return templates.TemplateResponse(
+            "cm_match_panel.html",
+            {
+                "request": request,
+                "job": job,
+                "missing_cv": True,
+                "match_score": "?",
+                "seniority_fit": "",
+                "skills_summary": "",
                 "strengths": [],
                 "gaps": [],
                 "next_steps": [],
             },
         )
 
-    # --- MOCK ANALYSIS (for now) ---
 
-    # pretend we know the user's profile a bit
-    # later you can pull this from DB / CV
-    user_skills = {"sql", "excel", "dashboarding", "power bi", "python"}
+    cv_text = cv.raw_text
 
-    job_tags = {t.lower() for t in job.get("tags", [])}
-    overlap = user_skills & job_tags
-    overlap_ratio = len(overlap) / max(len(job_tags), 1)
+    # 3. Build a single job_text string for the AI
+    job_desc = job.get("description") or job.get("snippet") or ""
+    job_text = f"{job.get('title', '')} at {job.get('company', '')}. {job_desc}"
 
-    # simple match score between 55 and 90
-    base = 55
-    match_score = int(base + overlap_ratio * 35)
+    # 4. Call AI safely (no keyword args; just positional)
+    try:
+        # Adjust this if your analyze_career_match signature is different
+        analysis = await analyze_career_match(cv_text, job_text)
+    except Exception as e:
+        print("Career match AI error:", e)
+        analysis = {}
 
-    if "junior" in job.get("level", "").lower():
-        seniority_fit = "Good for your current level"
-    elif "mid" in job.get("level", "").lower():
-        seniority_fit = "Good match (mid-level)"
-    else:
-        seniority_fit = "Stretch role – might be challenging"
+    if not isinstance(analysis, dict):
+        analysis = {}
 
-    if overlap:
-        skills_summary = f"You already match {len(overlap)} of {len(job_tags)} key skills for this role."
-    else:
-        skills_summary = "Your CV doesn’t clearly show the core skills for this role yet."
+    context = {
+        "request": request,
+        "job": job,
+        "missing_cv": False,
+        "match_score": analysis.get("match_score", "?"),
+        "seniority_fit": analysis.get("seniority_fit", "Fit not determined"),
+        "skills_summary": analysis.get("skills_summary", "Skill alignment not available"),
+        "strengths": analysis.get("strengths", []),
+        "gaps": analysis.get("gaps", []),
+        "next_steps": analysis.get("next_steps", []),
+    }
 
-    strengths = []
-    if "sql" in overlap:
-        strengths.append("Strong SQL basis for querying and manipulating data.")
-    if "dashboarding" in overlap or "power bi" in overlap:
-        strengths.append("Experience building dashboards and visual reports for stakeholders.")
-    strengths.append("Good analytical mindset and interest in data-driven work (based on your target).")
-
-    gaps = []
-    if "experiments" in job_tags:
-        gaps.append("Little explicit experience with A/B tests or experiments – consider adding 1–2 examples.")
-    if "product" in job_tags:
-        gaps.append("Limited product collaboration experience – emphasize any cross-functional work with PMs.")
-    if not gaps:
-        gaps.append("Clarify 1–2 concrete achievements with measurable impact in your CV.")
-
-    next_steps = [
-        "Add 2–3 bullet points in your CV that quantify impact (e.g. ‘improved X metric by Y%’).",
-        "Highlight tools and technologies that match the job tags (SQL, BI tools, analytics platforms).",
-        "Prepare 2–3 short stories about how you used data to support a decision or project.",
-    ]
-
-    return templates.TemplateResponse(
-        "cm_match_panel.html",
-        {
-            "request": request,
-            "job": job,
-            "match_score": match_score,
-            "seniority_fit": seniority_fit,
-            "skills_summary": skills_summary,
-            "strengths": strengths,
-            "gaps": gaps,
-            "next_steps": next_steps,
-        },
-    )
-
-
+    return templates.TemplateResponse("cm_match_panel.html", context)
 # ---------------------
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "temporary_secret"))
