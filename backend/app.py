@@ -245,7 +245,8 @@ def career_match_page(request: Request, db: Session = Depends(get_db)):
 
     return templates.TemplateResponse("career_match.html", {
         "request": request,
-        "user": user
+        "user": user,
+        "current_path": request.url.path
     })
 
 
