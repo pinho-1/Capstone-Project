@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     goal: null,
     experience: null,
     focus: null,
+    other_interest: null,
   };
 
   // --- PRELOAD EXPERIENCE (works for both new and returning users) ---
@@ -54,7 +55,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function updateSteps() {
     steps.forEach((step, i) => step.classList.toggle("active", i === current));
-    prevBtn.disabled = current === 0;
+
+    // Enable or disable Back button
+    if (current === 0) {
+      if (isUpdate) {
+        prevBtn.classList.remove('disabled');
+        prevBtn.removeAttribute("disabled");
+      } else {
+        prevBtn.classList.add('disabled');
+        prevBtn.setAttribute("disabled", "true");
+      }
+    } else {
+      prevBtn.classList.remove('disabled');
+      prevBtn.removeAttribute("disabled");
+    }
+
+    // Show Next/Previous buttons based on steps
     if (current === steps.length - 1) {
       nextBtn.style.display = "none";
       prevBtn.style.display = "none"; // hide Back button on last step
@@ -62,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
       nextBtn.style.display = "inline-block";
       prevBtn.style.display = "inline-block";
     }
+
     progress.style.width = ((current + 1) / steps.length) * 100 + "%";
 
     if (messageBox && messages[current]) {
@@ -75,23 +92,39 @@ document.addEventListener("DOMContentLoaded", () => {
     const stepEl = steps[current];
     const selectedBtns = stepEl.querySelectorAll(".options button.selected");
     const validationMsg = stepEl.querySelector(".validation-message");
+    const stepNum = parseInt(stepEl.dataset.step, 10);
 
     // clear message before next step
     if (validationMsg) validationMsg.classList.remove("visible");
 
+    // --- Step 2: handle "Other" field ---
+    let otherValue = "";
+    if (stepNum === 2) {
+      const otherInput = stepEl.querySelector(".other-interest-input");
+      if (otherInput) {
+        otherValue = otherInput.value.trim();
+      }
+    }
+    const hasOtherInterest = stepNum === 2 && otherValue !== "";
+
     // only validate steps with options
     const needsSelection = stepEl.querySelector(".options");
-    const stepNum = parseInt(stepEl.dataset.step);
-    if (needsSelection && selectedBtns.length === 0 && current < 3) {
+
+    // for steps 1–3, require at least one choice,
+    // EXCEPT step 2 where "Other" alone is enough
+    if (
+      needsSelection &&
+      selectedBtns.length === 0 &&
+      current < 3 &&
+      !hasOtherInterest
+    ) {
       if (validationMsg) {
-        // Different message for multi-choice Step 2
         validationMsg.textContent =
           stepNum === 2
-            ? "Select at least one option. This helps us better understand your interests."
+            ? "Select at least one option or write your own area. This helps us better understand your interests."
             : "Take a moment to choose one. It helps us tailor things for you.";
         validationMsg.classList.add("visible");
 
-        // auto-hide after 2 seconds
         setTimeout(() => {
           validationMsg.classList.remove("visible");
         }, 4000);
@@ -99,14 +132,25 @@ document.addEventListener("DOMContentLoaded", () => {
       return; // stop progression
     }
 
-    if (selectedBtns.length > 0) {
-      const stepNum = parseInt(stepEl.dataset.step);
-      if (stepNum === 1) answers.career_stage = selectedBtns[0].textContent;
-      if (stepNum === 2){
-        const selectedValues = Array.from(selectedBtns).map(btn => btn.textContent.trim());
-        answers.interest = selectedValues.join(",");
-      }
-      if (stepNum === 3) answers.goal = selectedBtns[0].textContent;
+    // --- Save answers from the current step ---
+    if (stepNum === 1 && selectedBtns.length > 0) {
+      answers.career_stage = selectedBtns[0].textContent;
+    }
+
+    if (stepNum === 2) {
+      // multiple choice interests
+      const selectedValues = Array.from(selectedBtns).map((btn) =>
+        btn.textContent.trim()
+      );
+      answers.interest =
+        selectedValues.length > 0 ? selectedValues.join(",") : null;
+
+      // save "Other" (even if no buttons selected)
+      answers.other_interest = otherValue || null;
+    }
+
+    if (stepNum === 3 && selectedBtns.length > 0) {
+      answers.goal = selectedBtns[0].textContent;
     }
 
     if (range && stepEl.dataset.step === "4") {
@@ -114,9 +158,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (stepEl.dataset.step === "5") {
-      answers.focus = stepEl.querySelector("textarea").value;
+      const focusText = stepEl.querySelector("textarea");
+      answers.focus = focusText ? focusText.value : null;
     }
 
+    // --- Move to next step / auto-submit at the end ---
     if (current < steps.length - 1) {
       current++;
       updateSteps();
@@ -131,13 +177,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const input = document.createElement("input");
             input.type = "hidden";
             input.name = name;
-            input.value = value;
+            input.value = value ?? "";
             form.appendChild(input);
           };
 
-          Object.entries(answers).forEach(([key, val]) =>
-            appendField(key, val)
-          );
+          Object.entries(answers).forEach(([key, val]) => appendField(key, val));
 
           document.body.appendChild(form);
           form.submit();
@@ -146,9 +190,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-
   prevBtn.addEventListener("click", () => {
-    if (current > 0) {
+    if (current === 0 && isUpdate) {
+      // If we're on Step 1 in update mode, go back to the homepage
+      window.location.href = '/';
+    } else if (current > 0) {
       current--;
       updateSteps();
     }
@@ -180,5 +226,38 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
+
+  // --- Accordion for Step 2 interest categories ---
+  const interestStep = document.querySelector('.step[data-step="2"]');
+  if (interestStep) {
+    const categoriesEls = interestStep.querySelectorAll('.interest-category');
+
+    categoriesEls.forEach((cat, index) => {
+      const header = cat.querySelector('h3');
+      const options = cat.querySelector('.options');
+      if (!header || !options) return;
+
+      // Auto-open if:
+      // - it's the first category, or
+      // - it already has selected buttons, or
+      // - it has a filled "Other" input
+      const hasSelected = options.querySelector('button.selected');
+      const otherInput = options.querySelector('.other-interest-input');
+      const hasOtherValue = otherInput && otherInput.value.trim() !== "";
+
+      if (index === 0 || hasSelected || hasOtherValue) {
+        cat.classList.add('open');
+      } else {
+        cat.classList.remove('open');
+      }
+
+      // Toggle on header click
+      header.addEventListener('click', () => {
+        cat.classList.toggle('open');
+      });
+    });
+  }
+
+
   updateSteps();
 });

@@ -9,13 +9,21 @@ html {
 }
 
 body {
+  margin: 0;
   font-family: "Inter", sans-serif;
   color: #111827;
-  background: radial-gradient(circle at 15% 20%, #b7d6eb 0%, transparent 35%),
-              radial-gradient(circle at 85% 80%, #d8e9f6 0%, transparent 40%),
-              linear-gradient(to bottom, #eef6fb 0%, #ffffff 40%, #f3f4f6 100%);
-  overflow-x: hidden;
-  margin: 0;
+  background:
+    radial-gradient(circle at 10% 20%, #c3e1f5 0, transparent 55%),
+    radial-gradient(circle at 90% 80%, #b7d8f0 0, transparent 55%),
+    radial-gradient(circle at 50% 120%, #e3f2ff 0, transparent 60%),
+    linear-gradient(to bottom, #e7f3fb 0, #f7fbff 40%, #f3f4f6 100%);
+  background-attachment: fixed;
+  animation: meshMove 2s ease-in-out infinite alternate;
+}
+
+@keyframes meshMove {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 2% 1%; }
 }
 
 /* === NAVIGATION === */
@@ -80,7 +88,6 @@ body {
 
 .logo-text {
   font-family: 'Poppins', sans-serif;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
   font-weight: 600;
   font-size: 1.5rem;
   color: #2e6a84;
@@ -108,27 +115,41 @@ body {
   padding: 0;
 }
 
-.navbar a:not(.nav-btn, .guest-btn, .logo) {
+.navbar a.nav-link {
   text-decoration: none;
-  font-weight: 500;
-  color: #4b5563; /* softer dark blue-gray */
+  font-family: "Poppins";
+  color: #4b5563;
   transition: color 0.2s ease;
+  position: relative;
 }
 
-.navbar a:not(.nav-btn, .guest-btn, .logo):hover {
+.navbar a.nav-link:hover {
   color: #8baedb;
 }
 
-.navbar a:not(.nav-btn, .guest-btn, .logo)::after {
+.navbar a.nav-link::after {
   content: "";
-  display: block;
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0;
   height: 2px;
   width: 0;
   background: #8baedb;
-  transition: width 0.3s ease;
+  transition: width 0.25s ease;
 }
-.navbar a:not(.nav-btn, .guest-btn, .logo):hover::after {
+
+.navbar a.nav-link:hover::after {
   width: 100%;
+}
+
+/* ACTIVE STATE */
+.nav-link.nav-link--active {
+  color: #2e6a84 !important;
+}
+
+.nav-link.nav-link--active::after {
+  width: 100% !important;
 }
 
 /* === PROFILE MENU/SIGN IN BUTTON === */
@@ -157,7 +178,7 @@ body {
   padding: 0.5rem 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-weight: 500;
+  font-weight: 600;
   color: #2e6a84;
 }
 
@@ -194,8 +215,14 @@ body {
 }
 
 .username {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  font-family: "Poppins";
   color: #2e6a84;
+}
+
+.login-btn {
+  font-size: 0.95rem;
+  font-family: "Poppins";
 }
 
 .chevron {
@@ -256,6 +283,11 @@ body {
 .dropdown a:hover {
   background: rgba(46, 106, 132, 0.08);
   color: #2e6a84;
+  backdrop-filter: blur(4px);
+}
+
+.dropdown a:first-child {
+  border-radius: 8px 8px 0 0;
 }
 
 /* Add subtle separation above Logout */
@@ -263,10 +295,12 @@ body {
   color: #b91c1c;
   font-weight: 600;
   border-top: 1px solid rgba(46, 106, 132, 0.3);
+  border-radius: 0 0 8px 8px;
 }
 
 .dropdown a:last-child:hover {
   color: #b91c1c;
+  background: rgba(161, 77, 51, 0.12);
 }
 
 /* Label span ensures underline width = text width */
@@ -344,7 +378,6 @@ body {
 
 .footer-logo-text {
   font-family: 'Poppins', sans-serif;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
   font-weight: 600;
   font-size: 1.35rem;
   color: #2e6a84;
