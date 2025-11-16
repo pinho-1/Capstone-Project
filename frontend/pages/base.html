@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Talentum</title>
@@ -9,7 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
   </head>
-
   <body class="{% if cv and cv.status != 'ready' %}cv-loading{% endif %}">
     <header>
 
@@ -30,7 +30,7 @@
               <li><a href="/chat" class="nav-link {% if current_path.startswith('/chat') %}nav-link--active{% endif %}">Chatbot</a></li>
               <li><a href="/cv" class="nav-link {% if current_path.startswith('/cv') %}nav-link--active{% endif %}">CV Upload</a></li>
               <li><a href="#" class="nav-link {% if current_path.startswith('#') %}nav-link--active{% endif %}">Interviews</a></li>
-              <li><a href="#" class="nav-link {% if current_path.startswith('#') %}nav-link--active{% endif %}">Career Match</a></li>
+              <li><a href="/cm" class="nav-link {% if current_path.startswith('/cm') %}nav-link--active{% endif %}">Career Match</a></li>
             {% else %}
               <li><a href="/about" class="nav-link {% if current_path.startswith('/about') %}nav-link--active{% endif %}">About</a></li>
               <li><a href="/#features" class="nav-link {% if current_path.startswith('/features') %}nav-link--active{% endif %}">Features</a></li>

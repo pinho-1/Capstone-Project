@@ -1,0 +1,44 @@
+{% set count = jobs|length if jobs else 0 %}
+
+<!-- update the header counter out-of-band -->
+<span id="cm-jobs-count"
+      class="cm-jobs-count"
+      hx-swap-oob="true">
+  {% if count == 0 %}
+    No results
+  {% elif count == 1 %}
+    1 result
+  {% else %}
+    {{ count }} results
+  {% endif %}
+</span>
+
+{% if jobs and jobs|length > 0 %}
+  {% for job in jobs %}
+    <li class="cm-job-card">
+      <div class="cm-job-main">
+        <h4>{{ job.title }}</h4>
+        <p class="cm-job-meta">
+          {{ job.company }} · {{ job.location }} · {{ job.mode }}
+        </p>
+        <p class="cm-job-snippet">
+          {{ job.snippet }}
+        </p>
+      </div>
+
+      <button 
+        class="btn ghost cm-job-analyze-btn"
+        hx-post="/cm/analyze"
+        hx-target="#cm-match-panel"
+        hx-swap="innerHTML"
+        hx-vals='{"job_id": "{{ job.id }}"}'>
+        Analyze match
+      </button>
+    </li>
+  {% endfor %}
+{% else %}
+  <li class="cm-no-results">
+    <p>No job results found.</p>
+    <p class="cm-no-results-sub">Try different keywords or locations.</p>
+  </li>
+{% endif %}
