@@ -1,21 +1,32 @@
-{% set count = jobs|length if jobs else 0 %}
+{# How many jobs to show initially #}
+{% set total = jobs|length if jobs else 0 %}
+{% set visible_limit = 2 %}
 
-<!-- update the header counter out-of-band -->
+{# 🔢 Update the counter in the header via OOB swap #}
 <span id="cm-jobs-count"
       class="cm-jobs-count"
       hx-swap-oob="true">
-  {% if count == 0 %}
+  {% if total == 0 %}
     No results
-  {% elif count == 1 %}
+  {% elif total == 1 %}
     1 result
   {% else %}
-    {{ count }} results
+    {{ total }} results
   {% endif %}
 </span>
 
-{% if jobs and jobs|length > 0 %}
+{# 💬 No jobs case #}
+{% if not jobs or total == 0 %}
+  <li class="cm-no-results">
+    <p>No job results found.</p>
+    <p class="cm-no-results-sub">Try different keywords or locations.</p>
+  </li>
+
+{% else %}
+  {# ✅ Render each job, hiding those after the limit #}
   {% for job in jobs %}
-    <li class="cm-job-card">
+    {% set idx = loop.index0 %}
+    <li class="cm-job-card {% if idx >= visible_limit %}cm-job-card--hidden{% endif %}">
       <div class="cm-job-main">
         <h4>{{ job.title }}</h4>
         <p class="cm-job-meta">
@@ -36,9 +47,17 @@
       </button>
     </li>
   {% endfor %}
-{% else %}
-  <li class="cm-no-results">
-    <p>No job results found.</p>
-    <p class="cm-no-results-sub">Try different keywords or locations.</p>
-  </li>
+
+  {# 📥 Load more button row #}
+  {% if total > visible_limit %}
+    <li class="cm-load-more-row">
+      <button
+        id="cm-load-more-btn"
+        type="button"
+        class="btn ghost cm-load-more-btn">
+        Load more jobs
+      </button>
+    </li>
+  {% endif %}
+
 {% endif %}

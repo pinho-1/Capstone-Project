@@ -306,61 +306,63 @@ async def cm_analyze(
     if not user:
         return RedirectResponse("/auth?error=login_required", status_code=303)
 
-    # 1. Find the selected job in mock data
+    # 1. Find job in mock data
     jobs = load_mock_jobs()
     job = next((j for j in jobs if str(j.get("id")) == str(job_id)), None)
 
     if not job:
-        # Something’s odd with this job id
+        # invalid job id
         return templates.TemplateResponse(
             "cm_match_panel.html",
             {
                 "request": request,
                 "job": None,
                 "missing_cv": False,
+                "cv_uploaded_at": None,
             },
         )
 
-    # 2. Grab MOST RECENT valid CV for this user
+    # 2. Get most recent CV with non-empty text
     cvs = (
         db.query(CV)
         .filter(
             CV.user_id == user.id,
             CV.raw_text != None,
-            CV.raw_text != ""
+            CV.raw_text != "",
         )
         .order_by(CV.updated_at.desc())
         .all()
     )
-
     cv = cvs[0] if cvs else None
 
-    if not cv:
+    # If no CV → friendly message
+    if not cv or not cv.raw_text:
         return templates.TemplateResponse(
             "cm_match_panel.html",
             {
                 "request": request,
                 "job": job,
                 "missing_cv": True,
+                "cv_uploaded_at": None,
                 "match_score": "?",
                 "seniority_fit": "",
                 "skills_summary": "",
                 "strengths": [],
                 "gaps": [],
                 "next_steps": [],
+                "skills_you_have": [],
+                "skills_missing": [],
+                "reason": "",
             },
         )
 
-
     cv_text = cv.raw_text
+    cv_uploaded_at = cv.updated_at  # we’ll show this in the UI
 
-    # 3. Build a single job_text string for the AI
     job_desc = job.get("description") or job.get("snippet") or ""
     job_text = f"{job.get('title', '')} at {job.get('company', '')}. {job_desc}"
 
-    # 4. Call AI safely (no keyword args; just positional)
     try:
-        # Adjust this if your analyze_career_match signature is different
         analysis = await analyze_career_match(cv_text, job_text)
     except Exception as e:
         print("Career match AI error:", e)
@@ -373,14 +375,24 @@ async def cm_analyze(
         "request": request,
         "job": job,
         "missing_cv": False,
+        "cv_uploaded_at": cv_uploaded_at,
         "match_score": analysis.get("match_score", "?"),
         "seniority_fit": analysis.get("seniority_fit", "Fit not determined"),
         "skills_summary": analysis.get("skills_summary", "Skill alignment not available"),
         "strengths": analysis.get("strengths", []),
         "gaps": analysis.get("gaps", []),
         "next_steps": analysis.get("next_steps", []),
+        "skills_you_have": analysis.get("skills_you_have", []),
+        "skills_missing": analysis.get("skills_missing", []),
+        "reason": analysis.get(
+            "reason",
+            "Overall match estimated based on your CV compared to this role."
+        ),
     }
 
+
     return templates.TemplateResponse("cm_match_panel.html", context)
+
+
 # ---------------------
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "temporary_secret"))
