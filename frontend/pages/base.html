@@ -29,7 +29,7 @@
             {% if user %}
               <li><a href="/chat" class="nav-link {% if current_path.startswith('/chat') %}nav-link--active{% endif %}">Chatbot</a></li>
               <li><a href="/cv" class="nav-link {% if current_path.startswith('/cv') %}nav-link--active{% endif %}">CV Upload</a></li>
-              <li><a href="#" class="nav-link {% if current_path.startswith('#') %}nav-link--active{% endif %}">Interviews</a></li>
+              <li><a href="/interviews" class="nav-link {% if current_path.startswith('/interviews') %}nav-link--active{% endif %}">Interviews</a></li>
               <li><a href="/cm" class="nav-link {% if current_path.startswith('/cm') %}nav-link--active{% endif %}">Career Match</a></li>
             {% else %}
               <li><a href="/about" class="nav-link {% if current_path.startswith('/about') %}nav-link--active{% endif %}">About</a></li>
