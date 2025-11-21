@@ -1,15 +1,9 @@
-{% if missing_cv %}
-  <div class="cm-match-card cm-match-placeholder">
-    <p>No CV found for your profile.</p>
-    <p class="cm-no-results-sub">
-      Upload your CV first so we can analyze how well you match this role.
-    </p>
-    <a href="/cv" class="btn secondary" style="margin-top: 0.6rem;">
-      Go to CV Upload
-    </a>
-  </div>
+{# ===============================
+   Career Match – Right Panel
+   =============================== #}
 
-{% elif not job %}
+{# 1) No job at all (invalid job id) #}
+{% if not job and not missing_cv %}
   <div class="cm-match-card cm-match-placeholder">
     <p>Something went wrong.</p>
     <p class="cm-no-results-sub">
@@ -17,6 +11,24 @@
     </p>
   </div>
 
+{# 2) Job selected but user has NO CV yet #}
+{% elif missing_cv %}
+  <div class="cm-match-card cm-match-placeholder">
+    <h3>No CV found for this analysis</h3>
+    <p>
+      To analyze your fit for
+      <strong>{{ job.title }}</strong> at <strong>{{ job.company }}</strong>,
+      you’ll need to upload a CV first.
+    </p>
+    <p class="cm-no-results-sub">
+      We’ll use your latest CV automatically for all future career matches.
+    </p>
+    <a href="/cv" class="btn primary" style="margin-top: 0.8rem;">
+      Upload my CV
+    </a>
+  </div>
+
+{# 3) Normal case – job + CV available #}
 {% else %}
   <div class="cm-match-card">
     <header class="cm-match-header">
@@ -28,9 +40,15 @@
         <p class="cm-match-meta">
           {{ job.location }} · {{ job.mode }} · {{ job.level }}
         </p>
+
+        {% if cv_uploaded_at %}
+          <p class="cm-cv-note">
+            Based on your CV uploaded on
+            {{ cv_uploaded_at.strftime("%d %b %Y") }}
+          </p>
+        {% endif %}
       </div>
 
-      <!-- match score badge -->
       <div class="cm-score-circle">
         <div class="cm-score-number">{{ match_score }}</div>
         <div class="cm-score-caption">MATCH</div>
@@ -57,7 +75,7 @@
           <li>{{ s }}</li>
         {% endfor %}
         {% if strengths|length == 0 %}
-          <li>No specific strengths were identified yet.</li>
+          <li>No strengths identified yet for this role.</li>
         {% endif %}
       </ul>
     </section>
@@ -69,7 +87,7 @@
           <li>{{ g }}</li>
         {% endfor %}
         {% if gaps|length == 0 %}
-          <li>No gaps were flagged for this match.</li>
+          <li>No specific gaps identified. You’re broadly aligned.</li>
         {% endif %}
       </ul>
     </section>
@@ -81,7 +99,7 @@
           <li>{{ step }}</li>
         {% endfor %}
         {% if next_steps|length == 0 %}
-          <li>We couldn’t generate concrete next steps yet.</li>
+          <li>Tailor your CV summary and key bullets to this role’s skills.</li>
         {% endif %}
       </ul>
     </section>

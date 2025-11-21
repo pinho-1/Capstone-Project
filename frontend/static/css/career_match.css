@@ -176,6 +176,16 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
+.cm-job-card--hidden {
+  display: none;
+}
+
+.cm-load-more {
+  text-align: center;
+  margin-top: 0.4rem;
+}
+
+
 .cm-no-results {
   padding: 1.4rem;
   text-align: center;
@@ -228,6 +238,45 @@
   font-size: 0.8rem;
   padding: 0.35rem 0.8rem;
 }
+
+/* Hidden job cards (for "Load more") */
+.cm-job-card--hidden {
+  display: none;
+}
+
+.cm-load-more-row {
+  text-align: center;
+  margin-top: 0.4rem;
+}
+
+.cm-load-more-btn {
+  font-size: 0.85rem;
+  padding: 0.45rem 1.2rem;
+  border-radius: 9999px;
+
+  /* 🔵 Talentum Blue Background */
+  background: #2e6a84 !important;
+  color: white !important;
+
+  border: none !important;
+  box-shadow: 0 4px 10px rgba(46, 106, 132, 0.25);
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.cm-load-more-btn:hover {
+  background: #25586d !important;      /* slightly darker hover */
+  box-shadow: 0 6px 14px rgba(46, 106, 132, 0.35);
+  transform: translateY(-1px);
+}
+
+.cm-load-more-btn:active {
+  background: #1d4554 !important;
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(46, 106, 132, 0.25);
+}
+
+
 
 /* Match card */
 .cm-match-card {
@@ -494,6 +543,13 @@
   font-size: 0.9rem;
   color: #64748b;
 }
+
+.cm-cv-note {
+  margin-top: 0.3rem;
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+
 
 @keyframes cm-spin {
   to {
