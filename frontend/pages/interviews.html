@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/interviews.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="interview-container">
+
+  <h1 class="interview-title">Mock Interviews</h1>
+  <p class="interview-subtitle">
+    Practice real interviews with Talentum’s voice recruiter, powered by ElevenLabs.
+  </p>
+
+  <!-- SETUP PANEL -->
+  <section class="setup-card">
+    <h2>Interview Setup</h2>
+
+    <label>Job Role</label>
+    <select id="role-select">
+      <option value="data_analyst">Data Analyst</option>
+      <option value="data_scientist">Data Scientist</option>
+      <option value="custom">Other (type manually)</option>
+    </select>
+
+    <input type="text" id="custom-role" placeholder="Enter job role..." class="hidden">
+
+    <label>Seniority Level</label>
+    <div class="toggle-group" id="seniority-group">
+      <button data-value="junior" class="active">Junior</button>
+      <button data-value="mid">Mid</button>
+      <button data-value="senior">Senior</button>
+    </div>
+
+    <label>Language</label>
+    <div class="toggle-group" id="language-group">
+      <button data-value="en" class="active">English</button>
+      <button data-value="pt">Português</button>
+    </div>
+
+    <label>Number of Questions</label>
+    <select id="question-count">
+      <option value="5">5</option>
+      <option value="8" selected>8 (recommended)</option>
+      <option value="10">10</option>
+    </select>
+
+    <button id="start-btn" class="primary-btn">Prepare Interview</button>
+  </section>
+
+  <!-- VOICE INTERVIEW PANEL -->
+  <section class="interview-card">
+    <h2>Voice Interview</h2>
+    <p class="interview-description">
+      Once the session is ready, press the microphone and speak naturally.
+      Talentum’s AI recruiter will ask you questions and listen to your answers.
+    </p>
+
+    <div class="voice-panel">
+      <div class="voice-status-row">
+        <span class="voice-status-dot" id="voice-status-dot"></span>
+        <span id="interview-status">Waiting for setup…</span>
+      </div>
+
+      <button class="mic-button" id="voice-toggle-btn" disabled>
+        <span class="mic-icon">🎙️</span>
+        <span class="mic-label">Start voice session</span>
+      </button>
+
+      <div class="ai-voice-visualizer">
+        <div class="ai-circle" id="ai-circle"></div>
+        <p class="ai-label">AI voice</p>
+      </div>
+
+      <p class="voice-note">
+        When ElevenLabs is connected, this button will start and pause the real-time voice interview.
+      </p>
+
+      <!-- Placeholder where you'll later embed ElevenLabs widget / iframe / audio element -->
+      <div class="voice-widget-placeholder">
+        <p>ElevenLabs voice widget will appear here.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', path='/js/interviews.js') }}"></script>
+{% endblock %}

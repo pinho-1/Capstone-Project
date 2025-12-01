@@ -262,3 +262,16 @@ def load_mock_jobs():
 
 # ---------------------
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "temporary_secret"))
+
+# pedro - interviews
+@app.get("/interviews", response_class=HTMLResponse)
+def interviews_page(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse("/auth?error=login_required", status_code=303)
+
+    return templates.TemplateResponse("interviews.html", {
+        "request": request,
+        "user": user,
+        "current_path": request.url.path
+    })
