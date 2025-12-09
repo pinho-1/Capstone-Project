@@ -230,15 +230,29 @@ def submit_onboarding(
 
     return RedirectResponse(f"/?welcome={user.name}", status_code=303)
 
-
 @app.get("/cv", response_class=HTMLResponse)
-def cv_upload_page(request: Request, db: Session = Depends(get_db)):
+def cv_entry_point(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
     if not user:
         return RedirectResponse("/auth?error=login_required", status_code=303)
-    return templates.TemplateResponse("cv_upload.html", {"request": request, "user": user, "current_path": request.url.path})
 
+    # Get latest CV for this user (by updated_at)
+    cv = (
+        db.query(CV)
+        .filter(CV.user_id == user.id)
+        .order_by(CV.updated_at.desc(), CV.id.desc())
+        .first()
+    )
 
+    if cv:
+        # User already has a CV → send to dashboard
+        return RedirectResponse(f"/cv/view/{cv.id}", status_code=303)
+
+    # No CV yet → show upload page
+    return templates.TemplateResponse(
+        "cv_upload.html",
+        {"request": request, "user": user, "current_path": request.url.path},
+    )
 
 #bruno
 @app.get("/cm", response_class=HTMLResponse)
