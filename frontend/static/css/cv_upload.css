@@ -295,7 +295,7 @@
   gap: 0.9rem;
   opacity: 0;
   transform: translateY(15px);
-  animation: fadeUp 0.6s ease forwards;
+  animation: fadeUp 0.9s ease forwards;
 }
 
 .side-panel.right .side-item {
@@ -303,13 +303,13 @@
 }
 
 .side-item:nth-child(1) {
-  animation-delay: 1.6s;
+  animation-delay: 1s;
 }
 .side-item:nth-child(2) {
-  animation-delay: 2.0s;
+  animation-delay: 1.5s;
 }
 .side-item:nth-child(3) {
-  animation-delay: 2.4s;
+  animation-delay: 2s;
 }
 
 @keyframes fadeUp {
@@ -338,13 +338,13 @@
 }
 
 .side-item:nth-child(1) .side-node {
-  animation-delay: 1.7s;
+  animation-delay: 1s;
 }
 .side-item:nth-child(2) .side-node {
-  animation-delay: 2.1s;
+  animation-delay: 1.5s;
 }
 .side-item:nth-child(3) .side-node {
-  animation-delay: 2.5s;
+  animation-delay: 2s;
 }
 
 @keyframes popIn {
