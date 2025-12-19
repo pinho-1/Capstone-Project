@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "title": "Data Analyst",
+    "company": "Nimbus Analytics",
+    "location": "Porto",
+    "mode": "Hybrid",
+    "level": "Mid-level",
+    "snippet": "Work with SQL, dashboards, and business stakeholders to turn data into decisions.",
+    "description": "Own analytics projects end-to-end, build dashboards, and support business teams with insights.",
+    "tags": ["SQL", "Power BI", "Dashboarding", "Business Analysis"],
+    "remote_friendly": true
+  },
+  {
+    "id": 2,
+    "title": "Junior Business Intelligence Specialist",
+    "company": "Aurora Bank",
+    "location": "Remote (EU)",
+    "mode": "Remote",
+    "level": "Junior",
+    "snippet": "Support BI reporting, maintain ETL pipelines, and help deliver insights to business units.",
+    "description": "Entry-level BI role focused on reporting, maintaining data pipelines, and assisting senior analysts.",
+    "tags": ["SQL", "ETL", "Reporting", "Banking"],
+    "remote_friendly": true
+  },
+  {
+    "id": 3,
+    "title": "Product Data Associate",
+    "company": "Helix Labs",
+    "location": "Lisbon",
+    "mode": "On-site",
+    "level": "Entry / Mid-level",
+    "snippet": "Bridge product and data: track KPIs, run experiments, and help prioritize features.",
+    "description": "Work closely with product managers to track metrics, analyze data, and support product decisions.",
+    "tags": ["KPIs", "Product", "Experiments"],
+    "remote_friendly": false
+  },
+  {
+    "id": 4,
+    "title": "Marketing Data Analyst",
+    "company": "BlueWave Media",
+    "location": "Madrid",
+    "mode": "Hybrid",
+    "level": "Mid-level",
+    "snippet": "Analyze campaign performance and build dashboards for the marketing team.",
+    "description": "Help optimize digital campaigns through data insights and reporting automation.",
+    "tags": ["Marketing Analytics", "Google Analytics", "Data Visualization"],
+    "remote_friendly": true
+  },
+  {
+    "id": 5,
+    "title": "Operations Analyst",
+    "company": "Flow Logistics",
+    "location": "Porto",
+    "mode": "On-site",
+    "level": "Junior / Mid-level",
+    "snippet": "Improve operational workflows and analyze process performance.",
+    "description": "Support operations teams by analyzing KPIs, optimizing workflows, and suggesting improvements.",
+    "tags": ["Excel", "Operations", "Logistics", "Reporting"],
+    "remote_friendly": false
+  }
+]

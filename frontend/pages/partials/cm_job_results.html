@@ -1,0 +1,63 @@
+{# How many jobs to show initially #}
+{% set total = jobs|length if jobs else 0 %}
+{% set visible_limit = 2 %}
+
+{# 🔢 Update the counter in the header via OOB swap #}
+<span id="cm-jobs-count"
+      class="cm-jobs-count"
+      hx-swap-oob="true">
+  {% if total == 0 %}
+    No results
+  {% elif total == 1 %}
+    1 result
+  {% else %}
+    {{ total }} results
+  {% endif %}
+</span>
+
+{# 💬 No jobs case #}
+{% if not jobs or total == 0 %}
+  <li class="cm-no-results">
+    <p>No job results found.</p>
+    <p class="cm-no-results-sub">Try different keywords or locations.</p>
+  </li>
+
+{% else %}
+  {# ✅ Render each job, hiding those after the limit #}
+  {% for job in jobs %}
+    {% set idx = loop.index0 %}
+    <li class="cm-job-card {% if idx >= visible_limit %}cm-job-card--hidden{% endif %}">
+      <div class="cm-job-main">
+        <h4>{{ job.title }}</h4>
+        <p class="cm-job-meta">
+          {{ job.company }} · {{ job.location }} · {{ job.mode }}
+        </p>
+        <p class="cm-job-snippet">
+          {{ job.snippet }}
+        </p>
+      </div>
+
+      <button 
+        class="btn ghost cm-job-analyze-btn"
+        hx-post="/cm/analyze"
+        hx-target="#cm-match-panel"
+        hx-swap="innerHTML"
+        hx-vals='{"job_id": "{{ job.id }}"}'>
+        Analyze match
+      </button>
+    </li>
+  {% endfor %}
+
+  {# 📥 Load more button row #}
+  {% if total > visible_limit %}
+    <li class="cm-load-more-row">
+      <button
+        id="cm-load-more-btn"
+        type="button"
+        class="btn ghost cm-load-more-btn">
+        Load more jobs
+      </button>
+    </li>
+  {% endif %}
+
+{% endif %}

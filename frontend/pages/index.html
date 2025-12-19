@@ -21,58 +21,60 @@
   <div class="flash bye">Goodbye, {{ goodbye }} 👋</div>
 {% endif %}
 
-
 <!-- HERO SECTION -->
 <section class="hero">
   <div class="hero-text">
+
     {% if user %}
       {% if user.goal == "Improve my CV" %}
-        <h1>Next stop:<br><span>a winning CV</span></h1>
-        <p>Let’s make your resume stand out and open new doors.</p>
-
-        <div class="hero-buttons">
+        <h1 class="hero-title">Next stop:<br><span>a winning CV</span></h1>
+        <p class="hero-subtitle">Let’s make your resume stand out and open new doors.</p>
+        <div class="hero-buttons hero-actions">
           <a id="journey-btn" href="/dashboard" class="btn primary">Continue Your Journey</a>
           <a href="/cv" class="btn secondary">Optimize My CV</a>
         </div>
 
       {% elif user.goal == "Prepare for interviews" %}
-        <h1>Next stop:<br><span>your dream role</span></h1>
-        <p>Let’s get you ready to ace your next interview with confidence.</p>
-
-        <div class="hero-buttons">
+        <h1 class="hero-title">Next stop:<br><span>your dream role</span></h1>
+        <p class="hero-subtitle">Let’s get you ready to ace your next interview with confidence.</p>
+        <div class="hero-buttons hero-actions">
           <a id="journey-btn" href="/dashboard" class="btn primary">Continue Your Journey</a>
           <a href="/interviews" class="btn secondary">Start Practicing</a>
         </div>
 
       {% elif user.goal == "Find new opportunities" %}
-        <h1>Next stop:<br><span>your next big break</span></h1>
-        <p>Let’s help you find roles that fit your goals and potential.</p>
-
-        <div class="hero-buttons">
+        <h1 class="hero-title">Next stop:<br><span>your next big break</span></h1>
+        <p class="hero-subtitle">Let’s help you find roles that fit your goals and potential.</p>
+        <div class="hero-buttons hero-actions">
           <a id="journey-btn" href="/dashboard" class="btn primary">Continue Your Journey</a>
           <a href="/jobs" class="btn secondary">Find Opportunities</a>
         </div>
 
       {% else %}
-        <h1>Next stop:<br><span>your dream job</span></h1>
-        <p>Your AI-powered mentor for smarter CVs, interviews, and career growth.</p>
-
-        <div class="hero-buttons">
+        <h1 class="hero-title">Next stop:<br><span>your dream job</span></h1>
+        <p class="hero-subtitle">Your AI-powered mentor for smarter CVs, interviews, and career growth.</p>
+        <div class="hero-buttons hero-actions">
           <a id="journey-btn" href="/dashboard" class="btn primary">Continue Your Journey</a>
           <a href="/chat" class="btn secondary">Go to Chatbot</a>
         </div>
       {% endif %}
-    {% else %}
-      <h1>Next stop:<br><span>your dream job</span></h1>
-      <p>Your AI-powered mentor for smarter CVs, interviews, and career growth.</p>
 
-      <div class="hero-buttons">
+    {% else %}
+      <h1 class="hero-title">Next stop:<br><span>your dream job</span></h1>
+      <p class="hero-subtitle">Your AI-powered mentor for smarter CVs, interviews, and career growth.</p>
+      <div class="hero-buttons hero-actions">
         <a id="journey-btn" href="/auth" class="btn primary">Start Your Journey</a>
         <a href="/chat" class="btn secondary">Explore the Chatbot</a>
       </div>
+
     {% endif %}
+    <!-- Social proof / meta line -->
+    <div class="hero-meta">
+      <span>Designed for students and early-career professionals.</span>
+    </div>
   </div>
-    <div class="scroll-indicator">
+
+  <div class="scroll-indicator">
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#2e6a84" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down">
       <polyline points="6 9 12 15 18 9"></polyline>
     </svg>
@@ -89,7 +91,7 @@
       <div class="feature-text">
         <h3>CV Optimization</h3>
         <p>Refine your CV with AI-powered insights that highlight your strengths and industry-relevant skills.</p>
-        <a href="/upload" class="feature-btn">Improve your CV</a>
+        <a href="/cv" class="feature-btn">Improve your CV</a>
       </div>
     </div>
 
@@ -111,7 +113,7 @@
       <div class="feature-text">
         <h3>Job Matching</h3>
         <p>Discover companies that align with your skills, values, and career ambitions — effortlessly.</p>
-        <a href="/upload" class="feature-btn">Find the perfect job for you</a>
+        <a href="/cm" class="feature-btn">Find the perfect job for you</a>
       </div>
     </div>
   </div>
