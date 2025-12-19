@@ -78,4 +78,80 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Keep maximum of 3 cards
+  (function () {
+    const MAX_CARDS = 3;
+
+    function stack() {
+      return document.querySelector("#cards-stack");
+    }
+
+    function activeCardCount() {
+      const s = document.querySelector("#cards-stack");
+      if (!s) return 0;
+      return s.querySelectorAll('.topic-card[data-status="active"]').length;
+    }
+
+
+    function getHtmxUrl(el) {
+      if (!el) return "";
+
+      // HTMX can use hx-* or data-hx-* attributes
+      const hxPost = el.getAttribute("hx-post") || el.getAttribute("data-hx-post");
+      const hxGet  = el.getAttribute("hx-get")  || el.getAttribute("data-hx-get");
+
+      // If click is on a child (icon/span), walk up
+      if (!hxPost && !hxGet) {
+        const owner = el.closest("[hx-post],[data-hx-post],[hx-get],[data-hx-get]");
+        if (!owner) return "";
+        return (
+          owner.getAttribute("hx-post") || owner.getAttribute("data-hx-post") ||
+          owner.getAttribute("hx-get")  || owner.getAttribute("data-hx-get")  ||
+          ""
+        );
+      }
+
+      return hxPost || hxGet || "";
+    }
+
+    function isAddCardRequest(url) {
+      // handle possible querystrings
+      return url.startsWith("/cv/intent") || url.startsWith("/cv/next-action");
+    }
+
+    function showLimitWarning() {
+      const el = document.querySelector("#cards-limit-warning");
+      if (!el) return;
+
+      el.hidden = false;
+      el.classList.remove("pop");
+      void el.offsetWidth; // replay animation
+      el.classList.add("pop");
+
+      clearTimeout(showLimitWarning._t);
+      showLimitWarning._t = setTimeout(() => (el.hidden = true), 5000);
+    }
+
+    // Block before request is sent
+    document.body.addEventListener("htmx:beforeRequest", (e) => {
+      const triggerEl = e.detail.elt;            // usually form/button
+      const url = getHtmxUrl(triggerEl);
+
+      if (!url) return;
+      if (!isAddCardRequest(url)) return;
+
+      if (activeCardCount() >= MAX_CARDS) {
+        e.preventDefault();
+        showLimitWarning();
+      }
+    });
+
+    // Hide warning when cards drop below max (dismissed)
+    document.body.addEventListener("htmx:afterSwap", () => {
+      const el = document.querySelector("#cards-limit-warning");
+      if (!el) return;
+      if (activeCardCount() < MAX_CARDS) el.hidden = true;
+    });
+  })();
+
 });

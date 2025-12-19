@@ -1,4 +1,5 @@
-<div class="topic-card" id="card-{{ card.id }}" data-card-id="{{ card.id }}">
+<div class="topic-card" id="card-{{ card.id }}" data-card-id="{{ card.id }}"
+ {% if card.subtitle and "Marked as done" in card.subtitle %}data-status="done"{% else %}data-status="active"{% endif %}>
 
   <div class="topic-top">
     <h4>{{ card.title }}</h4>
@@ -10,9 +11,8 @@
     <div class="topic-done-row">
       <span class="done-pill">Done</span>
       <button
-        class="btn ghost"
-        hx-delete="/cv/card"
-        hx-vals='{"card_id":"{{ card.id }}"}'
+        class="btn ghost small"
+        hx-delete="/cv/card?card_id={{ card.id }}"
         hx-target="#card-{{ card.id }}"
         hx-swap="outerHTML">
         Dismiss
@@ -29,39 +29,48 @@
 
     <details class="topic-example">
       <summary>Show example</summary>
-      <div class="example-box">
-        {{ card.example | safe }}
+
+      <div class="example-wrap">
+        <div class="example-loading htmx-indicator">Updating…</div>
+
+        <div class="example-box" id="example-{{ card.id }}">
+          {{ card.example | safe }}
+        </div>
       </div>
 
-      <div class="topic-actions">
+      <form class="topic-actions" hx-encoding="multipart/form-data">
+        <input type="hidden" name="card_id" value="{{ card.id }}"/>
+
         <button
-          class="btn ghost"
+          type="button"
+          class="btn ghost small"
           hx-post="/cv/card/variant"
-          hx-vals='{"card_id":"{{ card.id }}"}'
-          hx-target="#card-{{ card.id }}"
-          hx-swap="outerHTML"
-          hx-indicator="#ai-loading">
+          hx-include="closest form"
+          hx-target="#example-{{ card.id }}"
+          hx-swap="innerHTML"
+          hx-indicator="#card-{{ card.id }} .example-loading">
           Another example
         </button>
 
         <button
-          class="btn primary"
+          type="button"
+          class="btn primary small"
           hx-post="/cv/card/accept"
-          hx-vals='{"card_id":"{{ card.id }}"}'
+          hx-include="closest form"
           hx-target="#card-{{ card.id }}"
           hx-swap="outerHTML">
           Mark done
         </button>
 
         <button
-          class="btn ghost"
-          hx-delete="/cv/card"
-          hx-vals='{"card_id":"{{ card.id }}"}'
+          type="button"
+          class="btn ghost small"
+          hx-delete="/cv/card?card_id={{ card.id }}"
           hx-target="#card-{{ card.id }}"
           hx-swap="outerHTML">
           Dismiss
         </button>
-      </div>
+      </form>
     </details>
 
   {% endif %}

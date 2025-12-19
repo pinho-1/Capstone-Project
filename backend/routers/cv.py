@@ -1,5 +1,5 @@
 from fastapi import (
-    APIRouter, Request, Depends, UploadFile, File, Form, BackgroundTasks
+    APIRouter, Request, Depends, UploadFile, File, Form, BackgroundTasks, Query
 )
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from sqlalchemy.orm import Session
@@ -10,7 +10,8 @@ from backend.models.user_model import CV
 from fastapi.templating import Jinja2Templates
 from markupsafe import Markup, escape
 import re
-import asyncio, uuid, os
+import asyncio
+import os
 import uuid
 
 # AI + CV helpers
@@ -43,6 +44,8 @@ async def view_cv(request: Request, cv_id: str, db: Session = Depends(get_db)):
     # 🧠 Save mentor context to session
     if cv.mentor_focus:
         request.session["mentor_focus"] = cv.mentor_focus
+
+    request.session.pop("topic_cards", None)
 
     return templates.TemplateResponse(
         "cv_dashboard.html",
@@ -257,65 +260,98 @@ def cv_status(cv_id: str, db: Session = Depends(get_db)):
 
 # ========== 2. DYNAMIC MENTOR CARDS ==========
 
-SESSION_KEY = "topic_cards"
 PROGRESS_KEY = "mentor_progress"
 
-def get_cards(request: Request):
-    return request.session.setdefault(SESSION_KEY, {})
+# Cards live server-side (NOT in cookie session)
+CARDS_STORE: dict[str, dict[str, dict]] = {}  # {sid: {card_id: card_dict}}
 
-def get_progress(request: Request):
-    return request.session.setdefault(PROGRESS_KEY, {
-        "completed": [],
-        "dismissed": [],
-        "suggested": []
-    })
+def get_sid(request: Request) -> str:
+    sid = request.session.get("sid")
+    if not sid:
+        sid = str(uuid.uuid4())
+        request.session["sid"] = sid
+    return sid
+
+def get_cards(request: Request) -> dict[str, dict]:
+    sid = get_sid(request)
+    return CARDS_STORE.setdefault(sid, {})
+
+def get_progress(request: Request) -> dict:
+    return request.session.get(PROGRESS_KEY, {"completed": [], "dismissed": [], "suggested": []})
+
+def set_progress(request: Request, progress: dict) -> None:
+    request.session[PROGRESS_KEY] = progress
+
 
 @router.post("/intent", response_class=HTMLResponse)
 async def create_card(request: Request, intent: str = Form(...)):
     cv_text = request.session.get("uploaded_cv_text", "")
     card = await build_card_from_intent(intent, cv_text)
+
     cards = get_cards(request)
-    cards[card["id"]] = card
+    cid = str(card["id"])
+    card["id"] = cid
+    card["source"] = "intent"
+
+    cards[cid] = card
+
     return templates.TemplateResponse(
-        "partials/topic_card.html", {"request": request, "card": card}
+        "partials/topic_card.html",
+        {"request": request, "card": card}
     )
 
 
 @router.post("/card/variant", response_class=HTMLResponse)
 async def card_variant(request: Request, card_id: str = Form(...)):
     cards = get_cards(request)
-    card = cards.get(card_id)
+    cid = str(card_id)
+
+    card = cards.get(cid)
     if not card:
         return HTMLResponse("", status_code=204)
+
     card["example"] = await generate_example(card["playbook"], request.session.get("uploaded_cv_text", ""))
-    return templates.TemplateResponse(
-        "partials/topic_card.html", {"request": request, "card": card}
-    )
+    cards[cid] = card
+
+    return HTMLResponse(card["example"])
 
 
 @router.post("/card/accept", response_class=HTMLResponse)
 async def card_accept(request: Request, card_id: str = Form(...)):
     cards = get_cards(request)
     progress = get_progress(request)
-    card = cards.get(card_id)
+    cid = str(card_id)
+
+    card = cards.get(cid)
     if not card:
         return HTMLResponse("", status_code=204)
+
     card["subtitle"] = "Marked as done ✓"
     card["tips"] = []
+    cards[cid] = card
+
     progress["completed"].append(card["playbook"])
+    set_progress(request, progress)
+
     return templates.TemplateResponse(
-        "partials/topic_card.html", {"request": request, "card": card}
+        "partials/topic_card.html",
+        {"request": request, "card": card}
     )
 
 
 @router.delete("/card", response_class=HTMLResponse)
-async def card_delete(request: Request, card_id: str = Form(...)):
+async def card_delete(request: Request, card_id: str = Query(...)):
     cards = get_cards(request)
     progress = get_progress(request)
-    card = cards.pop(card_id, None)
+
+    cid = str(card_id)
+    card = cards.pop(cid, None)
+
     if card:
         progress["dismissed"].append(card["playbook"])
-    return HTMLResponse("", status_code=204)
+        set_progress(request, progress)
+
+    return HTMLResponse("", status_code=200)
 
 
 @router.get("/next-action", response_class=HTMLResponse)
@@ -324,29 +360,25 @@ async def next_best_action(request: Request):
     cv_text = request.session.get("uploaded_cv_text", "")
 
     already_done = set(progress["completed"] + progress["dismissed"])
-
-    # Expand suggestions beyond the 3 chips (still 1 card)
-    possible = [
-        "impact",
-        "summary",
-        "language",
-        "structure",
-        "skills",
-        "projects",
-        "ats",
-        "formatting",
-        "experience",
-    ]
-
+    possible = ["impact", "summary", "language", "structure", "skills", "projects", "ats", "formatting", "experience"]
     next_focus = next((p for p in possible if p not in already_done), "general")
 
     card = await build_card_from_intent(f"improve {next_focus}", cv_text)
+    card["source"] = "suggested"
+
+    cid = str(card["id"])
+    card["id"] = cid
+
     cards = get_cards(request)
-    cards[card["id"]] = card
+    cards[cid] = card
 
     progress["suggested"].append(next_focus)
+    set_progress(request, progress)
 
-    return templates.TemplateResponse("partials/topic_card.html", {"request": request, "card": card})
+    return templates.TemplateResponse(
+        "partials/topic_card.html",
+        {"request": request, "card": card}
+    )
 
 # ========== 3. TAILOR FOR JOB (KEEP) ==========
 

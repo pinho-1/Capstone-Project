@@ -48,7 +48,7 @@
         <span id="score-value">{{ cv.overall_score if cv.score_valid else "N/A" }}</span>
       </div>
 
-      <h3>Your CV Score</h3>
+      <h3 class="score-title">Your CV Score</h3>
       {% if cv.score_valid is defined and not cv.score_valid %}
         <p class="score-note">{{ cv.score_note }}</p>
       {% endif %}
@@ -146,7 +146,12 @@
 
     <!-- Right: AI Dynamic Mentor Panel -->
     <aside class="cv-actions-panel" id="ai-panel">
-      <h3>Next Steps</h3>
+      <div class="panel-head">
+        <div>
+          <h3>Next Steps</h3>
+          <p class="panel-subtitle">What do you want to improve?</p>
+        </div>
+      </div>
 
       <!-- Free-form intent -->
       <form
@@ -157,45 +162,63 @@
         hx-indicator="#ai-loading"
       >
         <div class="intent-input">
-          <input
-            name="intent"
-            type="text"
-            placeholder="Tell me what you want to improve… e.g., quantify my achievements"
-            required
-          />
-          <button class="btn primary" type="submit">Create</button>
+          <div class="intent-field">
+            <span class="ai-icon">✦</span>
+            <input
+              name="intent"
+              type="text"
+              placeholder="What should I improve?"
+              required
+            />
+          </div>
+
+          <button class="btn primary small" type="submit">Create</button>
         </div>
       </form>
 
       <!-- Small helpers -->
       <div class="quick-intents">
-        <button class="pill" hx-post="/cv/intent" hx-vals='{"intent":"make my summary punchier"}'
+        <!-- turn pills into mini buttons so the style matches -->
+        <button class="btn secondary small" hx-post="/cv/intent" hx-vals='{"intent":"make my summary punchier"}'
                 hx-target="#cards-stack" hx-swap="beforeend" hx-indicator="#ai-loading">Summary</button>
-        <button class="pill" hx-post="/cv/intent" hx-vals='{"intent":"add measurable impact to bullets"}'
+
+        <button class="btn secondary small" hx-post="/cv/intent" hx-vals='{"intent":"add measurable impact to bullets"}'
                 hx-target="#cards-stack" hx-swap="beforeend" hx-indicator="#ai-loading">Impact</button>
-        <button class="pill" hx-post="/cv/intent" hx-vals='{"intent":"remove buzzwords and tighten language"}'
+
+        <button class="btn secondary small" hx-post="/cv/intent" hx-vals='{"intent":"remove buzzwords and tighten language"}'
                 hx-target="#cards-stack" hx-swap="beforeend" hx-indicator="#ai-loading">Language</button>
       </div>
 
       <!-- Loading -->
-      <div id="ai-loading" class="htmx-indicator tiny-loading">Thinking…</div>
+      <div id="ai-loading" class="htmx-indicator ai-loading">
+        <span class="ai-spinner" aria-hidden="true"></span>
+        <span class="ai-loading-text">Preparing your next step…</span>
+      </div>
+
+      <!-- Maximum cards warning -->
+      <div id="cards-limit-warning" class="cards-limit-warning" hidden>
+        Max 3 cards. Mark one as <strong>done</strong> or <strong>dismiss</strong> it to generate more.
+      </div>
 
       <!-- Stack of dynamic topic cards -->
       <div id="cards-stack" class="cards-stack"></div>
 
       <!-- Next Step button -->
       <div id="next-step-wrapper" class="next-step hidden">
-        <button hx-get="/cv/next-action"
-                hx-target="#cards-stack"
-                hx-swap="innerHTML"
-                class="btn ghost">
+        <button
+          hx-get="/cv/next-action"
+          hx-target="#cards-stack"
+          hx-swap="beforeend"
+          hx-indicator="#ai-loading"
+          class="btn secondary small block"
+          type="button"
+        >
           Suggest Next Step
         </button>
-
       </div>
     </aside>
-    </div>
 
+  </div>
 </section>
 
 <!-- Tailor Modal -->

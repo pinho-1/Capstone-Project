@@ -274,7 +274,11 @@ def load_mock_jobs():
         return json.load(f)
 
 # ---------------------
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "temporary_secret"))
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SECRET_KEY", "temporary_secret"),
+    same_site="lax",
+)
 
 # pedro - interviews
 @app.get("/interviews", response_class=HTMLResponse)
