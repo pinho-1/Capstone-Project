@@ -20,13 +20,11 @@
 
     <div class="cv-actions">
       <form action="/cv/upload" method="post" enctype="multipart/form-data" class="inline-upload">
-        <label for="reupload" class="btn ghost">
+        <label for="reupload" class="btn primary">
           ⟳ Re-upload CV
         </label>
         <input id="reupload" name="file" type="file" accept=".pdf,.doc,.docx,.txt" onchange="this.form.submit()" hidden>
       </form>
-
-      <button id="tailor-btn" class="btn primary">🎯 Tailor for Job</button>
     </div>
   </header>
 
@@ -100,14 +98,14 @@
       <div id="mentor-feedback">
         <!-- Overview summary -->
         <div class="feedback-item overview">
-          <h4>💬 Overall Impression</h4>
+          <h4>🧾 Overall Impression</h4>
           <p>{{ cv.mentor_summary | emphasize(cv.mentor_highlights or []) }}</p>
         </div>
 
         <!-- Strengths -->
         {% if cv.mentor_strengths %}
         <div class="feedback-item positive">
-          <h4>✨ Strengths</h4>
+          <h4>💪 Strengths</h4>
           <ul>
             {% for s in cv.mentor_strengths %}
               <li>{{ s | emphasize(cv.mentor_highlights or []) }}</li>
@@ -220,39 +218,6 @@
 
   </div>
 </section>
-
-<!-- Tailor Modal -->
-<div id="tailor-modal" class="modal hidden" aria-hidden="true">
-  <div class="modal-backdrop" data-close></div>
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Tailor Your CV for a Job</h3>
-      <button class="icon-btn" data-close>✕</button>
-    </div>
-
-    <div class="modal-body">
-      <div class="jd-panel">
-        <label for="jd-text">Paste Job Description</label>
-        <textarea id="jd-text" placeholder="Paste the job posting here..."></textarea>
-      </div>
-      <div class="jd-controls">
-        <input id="jd-title" type="text" placeholder="Job Title (optional)">
-        <input id="jd-company" type="text" placeholder="Company (optional)">
-        <button id="analyze-btn" class="btn primary">Analyze Match</button>
-      </div>
-      <div id="jd-tags" class="jd-tags hidden"></div>
-      <div id="tailor-suggestions" class="cv-tailor-suggestions placeholder">
-        Paste a job description and click “Analyze Match” to see tailored recommendations.
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button id="apply-tailor" class="btn primary" disabled>Apply All</button>
-      <button class="btn ghost" data-close>Cancel</button>
-    </div>
-  </div>
-</div>
-
 
 <script src="https://unpkg.com/htmx.org@1.9.6"></script>
 <script src="{{ url_for('static', path='js/cv_dashboard.js') }}"></script>

@@ -1,47 +1,38 @@
 import os
 import io
 import re
-import json
-import glob
-import time
-from statistics import mean
-from datetime import datetime
-from typing import Dict, Any, Tuple
 from docx import Document
 from PyPDF2 import PdfReader
+from markupsafe import escape
+
 
 # --- Extract text from uploaded CV file ---
-async def extract_text_from_file(content_bytes: bytes, filename: str) -> str:
+def extract_text_from_file(content_bytes: bytes, filename: str) -> str:
     ext = os.path.splitext(filename)[1].lower().strip()
-    text = ""
 
-    print("DEBUG filename:", filename)
-
-    if ext in (".pdf", "pdf"):
+    if ext == ".pdf":
         reader = PdfReader(io.BytesIO(content_bytes))
         text = "\n".join(page.extract_text() or "" for page in reader.pages)
 
     elif ext in (".docx", ".doc"):
-        try:
-            doc = Document(io.BytesIO(content_bytes))
-            text = "\n".join(p.text for p in doc.paragraphs)
-        except Exception as e:
-            raise ValueError(f"Could not read Word document: {e}")
+        doc = Document(io.BytesIO(content_bytes))
+        text = "\n".join(p.text for p in doc.paragraphs)
 
-    elif ext in (".txt", "txt"):
+    elif ext == ".txt":
         text = content_bytes.decode("utf-8", errors="ignore")
-    else:
-        raise ValueError(f"Unsupported file type: '{ext}' — please upload a .pdf, .docx, or .txt file.")
 
-    # --- Basic cleaning ---
+    else:
+        raise ValueError(f"Unsupported file type: '{ext}' — upload .pdf, .docx, or .txt.")
+
     text = re.sub(r"\n\s*\n", "\n\n", text.strip())
     return text
 
+
 # ========== CARD BUILDING HELPERS ==========
 
-# --- Route intent to playbook ---
 def route_intent(intent: str) -> str:
-    t = intent.lower()
+    t = (intent or "").lower()
+
     if any(k in t for k in ["quantify", "metric", "impact", "results", "numbers", "kpi"]):
         return "impact"
     if any(k in t for k in ["summary", "profile", "objective", "headline", "pitch"]):
@@ -62,7 +53,7 @@ def route_intent(intent: str) -> str:
         return "experience"
     return "general"
 
-# --- Title from playbook ---
+
 def title_from_playbook(pb: str) -> str:
     return {
         "impact": "Strengthen Impact",
@@ -77,19 +68,36 @@ def title_from_playbook(pb: str) -> str:
         "general": "Targeted Improvement",
     }.get(pb, "Mentor Insight")
 
-# ========== SIGNAL NORMALIZER ===========
+
+def render_example_html(before: str, after: str) -> str:
+    before = escape(before or "")
+    after = escape(after or "")
+
+    return f"""
+<div class="example-spotlight">
+  <div class="after-spot">
+    <div class="ba-label">After</div>
+    <div class="ba-text">{after}</div>
+  </div>
+
+  <details class="before-drop">
+    <summary>See original</summary>
+    <div class="before-box">
+      <div class="ba-label">Before</div>
+      <div class="ba-text">{before}</div>
+    </div>
+  </details>
+</div>
+""".strip()
+
+
 def normalize_signals(raw_signals, default_tone="neutral", limit=4):
-    """
-    Accepts:
-      - list of dicts: {"label": "...", "tone": "positive|neutral|warning"}
-      - list of strings: "Business impact"
-    Returns: list of dicts with label+tone, deduped by label.
-    """
     if not isinstance(raw_signals, list):
         return []
 
     out = []
     seen = set()
+
     for item in raw_signals:
         if isinstance(item, dict):
             label = str(item.get("label", "")).strip()
@@ -111,8 +119,8 @@ def normalize_signals(raw_signals, default_tone="neutral", limit=4):
         if key in seen:
             continue
         seen.add(key)
-        out.append({"label": label, "tone": tone})
 
+        out.append({"label": label, "tone": tone})
         if len(out) >= limit:
             break
 

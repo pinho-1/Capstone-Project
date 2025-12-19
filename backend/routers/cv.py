@@ -5,7 +5,6 @@ from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from sqlalchemy.orm import Session
 from backend.database import get_db, SessionLocal
 from backend.routers.auth import get_current_user
-from backend.schemas.cv import TailorResponse
 from backend.models.user_model import CV
 from fastapi.templating import Jinja2Templates
 from markupsafe import Markup, escape
@@ -16,8 +15,8 @@ import uuid
 
 # AI + CV helpers
 from backend.services.ai.cv_agent import (score_cv_with_ai, build_card_from_intent, generate_example,
-    tailor_for_job, generate_center_insights, classify_document_is_cv)
-from backend.services.cv_utils import extract_text_from_file, normalize_signals
+                             generate_center_insights, classify_document_is_cv)
+from backend.services.cv_utils import extract_text_from_file, route_intent
 
 router = APIRouter()
 
@@ -26,6 +25,47 @@ FRONTEND_DIR = os.path.join(
     "../frontend/pages"
 )
 templates = Jinja2Templates(directory=FRONTEND_DIR)
+
+def emphasize(text: str, highlights: list[str]):
+    if not text or not highlights:
+        return escape(text)
+
+    raw = str(text)
+
+    phrases = sorted(
+        {p.strip() for p in highlights if isinstance(p, str) and p.strip()},
+        key=len,
+        reverse=True
+    )
+
+    result = raw
+    replacements = 0
+    MAX_REPLACEMENTS = 18
+
+    for phrase in phrases:
+        if replacements >= MAX_REPLACEMENTS:
+            break
+
+        pattern = re.compile(re.escape(phrase), re.IGNORECASE)
+
+        def repl(match):
+            nonlocal replacements
+            if replacements >= MAX_REPLACEMENTS:
+                return match.group(0)
+            replacements += 1
+            return f"<strong class='kw'>{match.group(0)}</strong>"
+
+        result = pattern.sub(repl, result, count=2)
+
+    result = result.replace("<strong class='kw'>", "%%KW_OPEN%%").replace("</strong>", "%%KW_CLOSE%%")
+    result = escape(result)
+    result = (str(result)
+              .replace("%%KW_OPEN%%", "<strong class='kw'>")
+              .replace("%%KW_CLOSE%%", "</strong>"))
+
+    return Markup(result)
+
+templates.env.filters["emphasize"] = emphasize
 
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
 
@@ -261,8 +301,8 @@ def cv_status(cv_id: str, db: Session = Depends(get_db)):
 # ========== 2. DYNAMIC MENTOR CARDS ==========
 
 PROGRESS_KEY = "mentor_progress"
+HISTORY_KEY = "mentor_history"
 
-# Cards live server-side (NOT in cookie session)
 CARDS_STORE: dict[str, dict[str, dict]] = {}  # {sid: {card_id: card_dict}}
 
 def get_sid(request: Request) -> str:
@@ -282,37 +322,87 @@ def get_progress(request: Request) -> dict:
 def set_progress(request: Request, progress: dict) -> None:
     request.session[PROGRESS_KEY] = progress
 
+def get_history(request: Request) -> dict:
+    return request.session.get(HISTORY_KEY, {})  # {playbook: [history_items...]}
+
+def set_history(request: Request, history: dict) -> None:
+    request.session[HISTORY_KEY] = history
+
+def is_done(card: dict) -> bool:
+    return "Marked as done" in str(card.get("subtitle", ""))
+
+def active_cards(cards: dict[str, dict]) -> list[dict]:
+    return [c for c in cards.values() if c and not is_done(c)]
+
+def active_playbooks(cards: dict[str, dict]) -> set[str]:
+    return {c.get("playbook") for c in active_cards(cards) if c.get("playbook")}
+
+def _push_history(request: Request, card: dict) -> None:
+    """Save last few generations per playbook, including dimensions."""
+    pb = card.get("playbook")
+    if not pb:
+        return
+
+    history = get_history(request)
+    history.setdefault(pb, [])
+
+    ex_raw = card.get("_example_raw") or {}
+    history[pb].append({
+        "tips": list(card.get("tips", [])),
+        "before": ex_raw.get("before", ""),
+        "after": ex_raw.get("after", ""),
+        "tips_dimension": card.get("_tips_dimension"),
+        "example_dimension": card.get("_example_dimension"),
+    })
+
+    # keep short memory per playbook
+    history[pb] = history[pb][-6:]
+    set_history(request, history)
+
 
 @router.post("/intent", response_class=HTMLResponse)
 async def create_card(request: Request, intent: str = Form(...)):
     cv_text = request.session.get("uploaded_cv_text", "")
-    card = await build_card_from_intent(intent, cv_text)
+
+    playbook = route_intent(intent)
+    history = get_history(request)
+    avoid = history.get(playbook, [])
+
+    card = await build_card_from_intent(intent, cv_text, avoid=avoid)
 
     cards = get_cards(request)
     cid = str(card["id"])
     card["id"] = cid
     card["source"] = "intent"
-
     cards[cid] = card
 
-    return templates.TemplateResponse(
-        "partials/topic_card.html",
-        {"request": request, "card": card}
-    )
+    return templates.TemplateResponse("partials/topic_card.html", {"request": request, "card": card})
 
 
 @router.post("/card/variant", response_class=HTMLResponse)
 async def card_variant(request: Request, card_id: str = Form(...)):
     cards = get_cards(request)
     cid = str(card_id)
-
     card = cards.get(cid)
     if not card:
         return HTMLResponse("", status_code=204)
 
-    card["example"] = await generate_example(card["playbook"], request.session.get("uploaded_cv_text", ""))
+    pb = card.get("playbook") or "general"
+    history = get_history(request)
+    avoid = history.get(pb, [])
+
+    example_data = await generate_example(
+        pb,
+        request.session.get("uploaded_cv_text", ""),
+        avoid=avoid
+    )
+
+    card["example"] = example_data["html"]
+    card["_example_raw"] = {"before": example_data["before"], "after": example_data["after"]}
+    card["_example_dimension"] = example_data.get("dimension")
     cards[cid] = card
 
+    # You’re swapping only the innerHTML of #example-{{id}}, so return only the example html
     return HTMLResponse(card["example"])
 
 
@@ -320,23 +410,27 @@ async def card_variant(request: Request, card_id: str = Form(...)):
 async def card_accept(request: Request, card_id: str = Form(...)):
     cards = get_cards(request)
     progress = get_progress(request)
-    cid = str(card_id)
 
+    cid = str(card_id)
     card = cards.get(cid)
     if not card:
         return HTMLResponse("", status_code=204)
+
+    # Save what was shown so future generations can avoid it
+    _push_history(request, card)
 
     card["subtitle"] = "Marked as done ✓"
     card["tips"] = []
     cards[cid] = card
 
-    progress["completed"].append(card["playbook"])
-    set_progress(request, progress)
+    pb = card.get("playbook")
+    if pb:
+        progress["completed"].append(pb)
+        # keep it tidy
+        progress["completed"] = progress["completed"][-50:]
+        set_progress(request, progress)
 
-    return templates.TemplateResponse(
-        "partials/topic_card.html",
-        {"request": request, "card": card}
-    )
+    return templates.TemplateResponse("partials/topic_card.html", {"request": request, "card": card})
 
 
 @router.delete("/card", response_class=HTMLResponse)
@@ -347,8 +441,17 @@ async def card_delete(request: Request, card_id: str = Query(...)):
     cid = str(card_id)
     card = cards.pop(cid, None)
 
-    if card:
-        progress["dismissed"].append(card["playbook"])
+    # If card doesn't exist, just return ok
+    if not card:
+        return HTMLResponse("", status_code=200)
+
+    # Save to history even if dismissed (so it still avoids repeats)
+    _push_history(request, card)
+
+    pb = card.get("playbook")
+    if pb:
+        progress["dismissed"].append(pb)
+        progress["dismissed"] = progress["dismissed"][-50:]
         set_progress(request, progress)
 
     return HTMLResponse("", status_code=200)
@@ -359,91 +462,31 @@ async def next_best_action(request: Request):
     progress = get_progress(request)
     cv_text = request.session.get("uploaded_cv_text", "")
 
-    already_done = set(progress["completed"] + progress["dismissed"])
-    possible = ["impact", "summary", "language", "structure", "skills", "projects", "ats", "formatting", "experience"]
-    next_focus = next((p for p in possible if p not in already_done), "general")
+    already_done = set(progress.get("completed", []) + progress.get("dismissed", []))
 
-    card = await build_card_from_intent(f"improve {next_focus}", cv_text)
+    cards = get_cards(request)
+    already_open = active_playbooks(cards)
+
+    possible = ["impact", "summary", "language", "structure", "skills", "projects", "ats", "formatting", "experience"]
+
+    next_focus = next((p for p in possible if p not in already_done and p not in already_open), None)
+    if next_focus is None:
+        next_focus = next((p for p in possible if p not in already_done), "general")
+
+    # IMPORTANT: use history avoid for that playbook too
+    history = get_history(request)
+    avoid = history.get(next_focus, [])
+
+    card = await build_card_from_intent(f"improve {next_focus}", cv_text, avoid=avoid)
     card["source"] = "suggested"
 
     cid = str(card["id"])
     card["id"] = cid
 
-    cards = get_cards(request)
     cards[cid] = card
 
     progress["suggested"].append(next_focus)
+    progress["suggested"] = progress["suggested"][-50:]
     set_progress(request, progress)
 
-    return templates.TemplateResponse(
-        "partials/topic_card.html",
-        {"request": request, "card": card}
-    )
-
-# ========== 3. TAILOR FOR JOB (KEEP) ==========
-
-@router.post("/tailor", response_model=TailorResponse)
-async def cv_tailor(
-    request: Request,
-    db: Session = Depends(get_db),
-    job_description: str = Form(...),
-    job_title: str = Form(None),
-    company: str = Form(None),
-    doc_json: str = Form(None),
-):
-    user = get_current_user(request, db)
-    if not user:
-        return JSONResponse({"detail": "login_required"}, status_code=401)
-    suggestions = await tailor_for_job(job_description, job_title, company, doc_json)
-    return JSONResponse(suggestions)
-
-# ========== 4. HELPERS ==========
-
-def emphasize(text: str, highlights: list[str]):
-    if not text or not highlights:
-        return escape(text)
-
-    # Work on raw text first (better matching), then trust our own tags
-    raw = str(text)
-
-    # Clean + sort phrases (longest first)
-    phrases = sorted(
-        {p.strip() for p in highlights if isinstance(p, str) and p.strip()},
-        key=len,
-        reverse=True
-    )
-
-    result = raw
-    replacements = 0
-    MAX_REPLACEMENTS = 18  # increase if you want more
-
-    for phrase in phrases:
-        if replacements >= MAX_REPLACEMENTS:
-            break
-
-        # Match the phrase (case-insensitive). No \b because multi-word/hyphen phrases can fail boundaries.
-        pattern = re.compile(re.escape(phrase), re.IGNORECASE)
-
-        def repl(match):
-            nonlocal replacements
-            if replacements >= MAX_REPLACEMENTS:
-                return match.group(0)
-            replacements += 1
-            return f"<strong class='kw'>{match.group(0)}</strong>"
-
-        # Replace up to 2 occurrences per phrase (tweak if you want)
-        result = pattern.sub(repl, result, count=2)
-
-    # Escape everything EXCEPT our <strong> tags (simple, safe enough for this use)
-    # 1) temporarily protect strong tags
-    result = result.replace("<strong class='kw'>", "%%KW_OPEN%%").replace("</strong>", "%%KW_CLOSE%%")
-    # 2) escape the rest
-    result = escape(result)
-    # 3) restore tags
-    result = (str(result)
-              .replace("%%KW_OPEN%%", "<strong class='kw'>")
-              .replace("%%KW_CLOSE%%", "</strong>"))
-
-    return Markup(result)
-
-templates.env.filters["emphasize"] = emphasize
+    return templates.TemplateResponse("partials/topic_card.html", {"request": request, "card": card})

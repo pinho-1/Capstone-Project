@@ -83,11 +83,11 @@ body { font-family: "Inter", sans-serif; }
   align-items: center;
   justify-content: center;
 
-  padding: 0.6rem 1.3rem;
+  padding: 0.7rem 1.4rem;
   border-radius: 9999px;
 
   font-family: "Poppins", sans-serif;
-  font-size: 0.9rem;
+  font-size: 1rem;
   letter-spacing: 0.2px;
 
   border: 2px solid transparent;
@@ -192,7 +192,7 @@ body { font-family: "Inter", sans-serif; }
 }
 
 .score-note{
-  margin-top: -0.75rem;
+  margin-top: 1rem;
   margin-bottom: 1rem;
   color: #475569;
   font-size: 0.9rem;
@@ -226,15 +226,6 @@ body { font-family: "Inter", sans-serif; }
   backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
-}
-
-.cv-insights::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 20% 0%, rgba(46,106,132,0.14), transparent 5%),
-              radial-gradient(circle at 85% 15%, rgba(107,180,214,0.14), transparent 50%);
-  pointer-events: none;
 }
 
 .mentor-title h3 {
@@ -705,6 +696,80 @@ body { font-family: "Inter", sans-serif; }
   line-height: 1.5;
 }
 
+/* Example spotlight layout (stacked) */
+.example-spotlight{
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+
+/* After is the hero */
+.after-spot{
+  padding: .8rem .9rem;
+  border-radius: 14px;
+  background: rgba(220,252,231,.62);
+  border: 1px solid rgba(34,197,94,.22);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55);
+}
+
+/* Before is tucked away */
+.before-drop summary{
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+
+  font-weight: 700;
+  font-size: .88rem;
+  color: #2e6a84;
+
+  padding: .32rem .65rem;
+  border-radius: 999px;
+  background: rgba(46,106,132,.06);
+  border: 1px solid rgba(46,106,132,.12);
+
+  transition: transform .15s ease, background-color .2s ease;
+}
+
+.before-drop summary:hover{
+  background: rgba(46,106,132,.14);
+  transform: translateY(-1px);
+}
+
+.before-drop summary::before{
+  content: "▶";
+  font-size: .7rem;
+  transition: transform .18s ease;
+}
+
+.before-drop[open] summary::before{
+  transform: rotate(90deg);
+}
+
+.before-box{
+  margin-top: .55rem;
+  padding: .75rem .85rem;
+  border-radius: 14px;
+  background: rgba(226,232,240,.55);
+  border: 1px solid rgba(15,23,42,.10);
+}
+
+/* Labels and text inside both */
+.ba-label{
+  font-size: .74rem;
+  font-weight: 800;
+  letter-spacing: .2px;
+  text-transform: uppercase;
+  color: #567086;
+  margin-bottom: .35rem;
+}
+
+.ba-text{
+  font-size: .95rem;
+  line-height: 1.45;
+  color: #0f172a;
+}
+
 /* Action row: smaller buttons + spacing + wrap */
 .topic-actions {
   margin-top: 0.65rem;
@@ -775,28 +840,3 @@ body { font-family: "Inter", sans-serif; }
   from { opacity: 0; transform: translateY(10px) scale(0.99); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-
-/* =============== TAILOR MODAL =============== */
-.modal.hidden { display: none; }
-.modal { position: fixed; inset: 0; z-index: 80; }
-.modal-backdrop { position: absolute; inset: 0; background: rgba(15,23,42,0.45); }
-.modal-content {
-  position: relative; margin: 4vh auto; max-width: 1000px;
-  background: #fff; border-radius: 16px;
-  padding: 1.25rem;
-}
-.modal-header, .modal-footer { display: flex; justify-content: space-between; align-items: center; }
-.modal-header h3 { color: #2e6a84; margin: 0; }
-.jd-controls { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.5rem; }
-.jd-controls input { border: 1px solid #cbd5e1; border-radius: 9999px; padding: 0.55rem 0.9rem; }
-.jd-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-.jd-tags .tag { background: #e2edf3; color: #2e6a84; padding: 0.25rem 0.6rem; border-radius: 9999px; }
-
-/* Tailor Suggestions */
-.cv-tailor-suggestions { display: flex; flex-direction: column; gap: 0.75rem; }
-.tailor-item {
-  background: rgba(255,255,255,0.8); border: 1px solid rgba(46,106,132,0.15);
-  border-radius: 10px; padding: 0.9rem 1rem; transition: all 0.25s ease;
-}
-.tailor-item.open .tailor-body { display: block; }
-.tailor-body { display: none; border-top: 1px solid rgba(46,106,132,0.1); margin-top: 0.75rem; padding-top: 0.75rem; }
