@@ -273,7 +273,6 @@ def load_mock_jobs():
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-
 # ---------------------
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "temporary_secret"))
 

@@ -1,7 +1,7 @@
 import json
 from .gemini_client import generate_json
 from backend.utils.sanitize import sanitize_json
-from backend.services.cv_utils import route_intent, title_from_playbook
+from backend.services.cv_utils import route_intent, title_from_playbook, normalize_signals
 import uuid
 
 # ========== CV SCORING ==========
@@ -18,7 +18,7 @@ SYSTEM_SCORE = (
 
 async def score_cv_with_ai(raw_text: str):
     payload = {"cv_text": raw_text}
-    result = await generate_json(SYSTEM_SCORE, payload)
+    result = await generate_json(SYSTEM_SCORE, payload, temperature=0.0)
     result = sanitize_json(result)
 
     if not isinstance(result, dict) or "overall" not in result:
@@ -33,16 +33,63 @@ async def score_cv_with_ai(raw_text: str):
         }
     return result
 
+# ========== CV CLASSIFIER ==========
+SYSTEM_CV_CLASSIFIER = (
+    "You are a strict document classifier for a CV/resume upload feature.\n"
+    "Decide if the document is a CV/resume or NOT.\n"
+    "Return JSON only in this format:\n"
+    "{ 'is_cv': bool, 'confidence': int, 'reason': str, 'signals': [ { 'label': str, 'tone': 'positive'|'neutral'|'warning  ' } ] }\n"
+    "Rules:\n"
+    "- confidence is 0-100.\n"
+    "- reason is 1 sentence, plain text.\n"
+    "- signals: 1 to 4 items, each with a short label and a tone.\n"
+    "A CV typically contains: contact info, skills, experience/education, dates, bullet points.\n"
+    "Non-CV examples: academic report, paper, slides, invoices, random notes.\n"
+)
+
+async def classify_document_is_cv(raw_text: str) -> dict:
+    payload = {"cv_text": raw_text}
+    result = await generate_json(SYSTEM_CV_CLASSIFIER, payload, temperature=0.0)
+    result = sanitize_json(result)
+
+    if not isinstance(result, dict):
+        return {"is_cv": True, "confidence": 50, "reason": "Could not classify reliably.", "signals": ["Uncertain"]}
+
+    result.setdefault("is_cv", True)
+    result.setdefault("confidence", 50)
+    result.setdefault("reason", "No reason provided.")
+    result.setdefault("signals", [])
+    result["signals"] = normalize_signals(result["signals"], default_tone="neutral", limit=4)
+    return result
+
+    return result
+
 # ========== EXTRACT SECTIONS ==========
 SYSTEM_CENTER = (
-    "You are a career mentor summarizing the overall strengths and improvement areas "
-    "of a candidate's CV. Based on the provided text, return a concise and structured analysis. "
-    "Keep the tone supportive, insightful, and mentor-like — not robotic. "
+    "You are a career mentor reviewing a CV. "
+    "Be concise, direct, and practical. Avoid academic tone. "
+    "IMPORTANT RULES:\n"
+    "- Summary: max 2 sentences.\n"
+    "- Strengths: 3 to 5 bullet points, short phrases.\n"
+    "- Improvements: 3 to 5 bullet points, actionable.\n"
+    "- Recommended focus: exactly 1 sentence.\n"
+    "- Signals: 2 to 4 items with tone tags.\n"
+    "If the document is NOT a CV (e.g. report, paper, slides), "
+    "state this clearly in the summary and recommendations.\n\n"
     "Return JSON:\n"
     "{ 'summary': str, "
     "'strengths': [str], "
     "'improvements': [str], "
-    "'recommended_focus': str }"
+    "'recommended_focus': str, "
+    "'signals': [ { 'label': str, 'tone': 'positive'|'neutral'|'warning' } ], "
+    "'highlights': [str] } \n"
+    "Rules for highlights:\n"
+    "- Return 12 to 18 phrases. (1–5 words each).\n"
+    "- Each highlight MUST appear verbatim (copy-paste exact) somewhere in: summary OR strengths OR improvements OR recommended_focus.\n"
+    "- Mix across categories: (skills/tools), (actions), (outcomes/impact), (issues).\n"
+    "- Prefer specific multi-word phrases over single words.\n"
+    "- No duplicates.\n"
+    "- Plain text only.\n"
 )
 
 async def generate_center_insights(cv_text: str) -> dict:
@@ -59,6 +106,15 @@ async def generate_center_insights(cv_text: str) -> dict:
         result.setdefault("strengths", [])
         result.setdefault("improvements", [])
         result.setdefault("recommended_focus", "No focus identified.")
+        result.setdefault("signals", [])
+        result["signals"] = normalize_signals(result["signals"], default_tone="neutral", limit=4)
+        result.setdefault("highlights", [])
+        if not isinstance(result["highlights"], list):
+            result["highlights"] = []
+        result["highlights"] = result["highlights"][:20]
+
+        result["strengths"] = result["strengths"][:5]
+        result["improvements"] = result["improvements"][:5]
 
         return result
     except Exception as e:

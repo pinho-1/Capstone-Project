@@ -63,4 +63,19 @@ document.addEventListener("DOMContentLoaded", () => {
       reason.classList.toggle("visible");
     })
   );
+
+  // Topic card animation
+  document.body.addEventListener("htmx:afterSwap", (e) => {
+    // Only when we append into the stack
+    if (e.target && e.target.id === "cards-stack") {
+      const cards = e.target.querySelectorAll(".topic-card");
+      const newest = cards[cards.length - 1];
+      if (newest) {
+        newest.classList.add("pop");
+        setTimeout(() => newest.classList.remove("pop"), 300);
+        newest.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    }
+  });
+
 });
