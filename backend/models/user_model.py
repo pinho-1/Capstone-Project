@@ -48,3 +48,49 @@ class CV(Base):
 
     user = relationship("User", backref="cvs")
 
+class JobApplication(Base):
+    __tablename__ = "job_applications"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    
+    # Job details
+    company = Column(String, nullable=False)
+    role = Column(String, nullable=False)
+    job_url = Column(String, nullable=True)
+    
+    # Application tracking
+    applied_date = Column(DateTime, default=datetime.utcnow)
+    status = Column(String, default="applied")  # applied, interview, rejected, offer, accepted
+    
+    # Follow-up
+    follow_up_date = Column(DateTime, nullable=True)
+    follow_up_completed = Column(Boolean, default=False)
+    
+    # Notes
+    notes = Column(Text, nullable=True)
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationship
+    user = relationship("User", backref="job_applications")
+
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    
+    role = Column(String, nullable=False)  # "user" or "assistant"
+    content = Column(Text, nullable=False)
+    
+    # Store function calls if any
+    function_call = Column(JSON, nullable=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationship
+    user = relationship("User", backref="chat_messages")

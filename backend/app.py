@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from backend.database import Base, engine, get_db
 from backend.models.user_model import User, CV 
 from typing import Optional, Any
-from backend.routers import auth, cv, cm
+from backend.routers import auth, cv, cm, chat
 from backend.routers.auth import get_current_user
 from backend.services.ai.career_match import analyze_career_match
 from sqlalchemy.orm import Session
@@ -35,7 +35,7 @@ app.include_router(cv.router, prefix="/cv", tags=["cv"])
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(cv.router, prefix="/cv", tags=["cv"])
 app.include_router(cm.router)   # já tem prefix="/cm" no próprio router
-
+app.include_router(chat.router, prefix="/chat", tags=["chat"])
 
 # Get Path
 def get_current_path(request: Request):
