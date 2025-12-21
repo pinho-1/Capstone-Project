@@ -15,15 +15,13 @@
   {% endif %}
 </span>
 
-{# 💬 No jobs case #}
 {% if not jobs or total == 0 %}
   <li class="cm-no-results">
     <p>No job results found.</p>
     <p class="cm-no-results-sub">Try different keywords or locations.</p>
   </li>
-
 {% else %}
-  {# ✅ Render each job, hiding those after the limit #}
+
   {% for job in jobs %}
     {% set idx = loop.index0 %}
     <li class="cm-job-card {% if idx >= visible_limit %}cm-job-card--hidden{% endif %}">
@@ -32,23 +30,21 @@
         <p class="cm-job-meta">
           {{ job.company }} · {{ job.location }} · {{ job.mode }}
         </p>
-        <p class="cm-job-snippet">
-          {{ job.snippet }}
-        </p>
+        <p class="cm-job-snippet">{{ job.snippet }}</p>
       </div>
 
-      <button 
-        class="btn ghost cm-job-analyze-btn"
+      <button
+        class="btn primary cm-job-analyze-btn"
+        type="button"
         hx-post="/cm/analyze"
         hx-target="#cm-match-panel"
         hx-swap="innerHTML"
-        hx-vals='{"job_id": "{{ job.id }}"}'>
+        hx-vals='{"job_id":"{{ job.id }}"}'>
         Analyze match
       </button>
     </li>
   {% endfor %}
 
-  {# 📥 Load more button row #}
   {% if total > visible_limit %}
     <li class="cm-load-more-row">
       <button

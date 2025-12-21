@@ -3,25 +3,30 @@
 {% block title %}Career Match · Talentum{% endblock %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{{ url_for('static', path='css/cv_upload.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', path='css/career_match.css') }}">
 {% endblock %}
 
 {% block content %}
 <section class="cm-wrapper">
-  <header class="cm-header">
-    <div>
-      <h1>Career Match</h1>
+
+  <!-- CV-style header card -->
+  <header class="cm-header grid-layout">
+    <div class="cm-title">
+      <h2>Career Match</h2>
       <p>Search roles and instantly see how well your profile fits each opportunity.</p>
     </div>
-    <div class="cm-header-pill">
-      <span>Using your CV + preferences</span>
+
+    <div class="cm-actions">
+      <div class="cm-header-pill">
+        <span>Using your CV + preferences</span>
+      </div>
     </div>
   </header>
 
   <section class="cm-grid">
     <!-- LEFT: search + job list -->
     <aside class="cm-column cm-left">
+
       <div class="cm-search-card">
         <h2>Find roles</h2>
         <p class="cm-search-sub">
@@ -48,29 +53,23 @@
           </div>
 
           <div class="cm-search-bottom">
-            <div class="cm-mode-toggle">
-              <label class="cm-mode-pill">
-                <input type="radio" name="mode" value="any" checked>
-                <span>Any</span>
-              </label>
-              <label class="cm-mode-pill">
-                <input type="radio" name="mode" value="on-site">
-                <span>On-site</span>
-              </label>
-              <label class="cm-mode-pill">
-                <input type="radio" name="mode" value="hybrid">
-                <span>Hybrid</span>
-              </label>
-              <label class="cm-mode-pill">
-                <input type="radio" name="mode" value="remote">
-                <span>Remote</span>
-              </label>
+
+            <div class="cm-field cm-field--inline cm-field--mode">
+              <label for="cm-mode">Work mode</label>
+              <select id="cm-mode" name="mode" class="cm-select">
+                <option value="any" selected>Any</option>
+                <option value="on-site">On-site</option>
+                <option value="hybrid">Hybrid</option>
+                <option value="remote">Remote</option>
+              </select>
             </div>
 
             <button type="submit" class="btn primary cm-search-btn">
               Search jobs
             </button>
+
           </div>
+
         </form>
       </div>
 
@@ -97,7 +96,7 @@
       </div>
     </main>
 
-  </section> <!-- end .cm-grid -->
+  </section>
 
   <!-- ANALYZING OVERLAY -->
   <div id="cm-analyzing-overlay" class="cm-analyzing-overlay">
@@ -107,10 +106,8 @@
       <p class="cm-analyzing-sub">Looking at your CV and this job description.</p>
     </div>
   </div>
-  <!-- END OVERLAY -->
 
-</section> <!-- end .cm-wrapper -->
-
+</section>
 
 <script src="{{ url_for('static', path='js/career_match.js') }}"></script>
 {% endblock %}

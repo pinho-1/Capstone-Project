@@ -8,7 +8,7 @@ from backend.models.cv_model import CV
 from typing import Optional, Any
 from backend.routers import auth, cv, cm, chat
 from backend.routers.auth import get_current_user
-from backend.services.ai.career_match import analyze_career_match
+from backend.services.ai.career_match import extract_career_match_facts
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
