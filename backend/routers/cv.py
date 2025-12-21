@@ -172,7 +172,7 @@ def process_uploaded_cv(cv_id: str, filename: str, content_bytes: bytes):
         }
 
     try:
-        raw_text = asyncio.run(extract_text_from_file(content_bytes, filename))
+        raw_text = extract_text_from_file(content_bytes, filename)
 
         # 1) Classify: CV or NOT CV (no “maybe”)
         ai_class = asyncio.run(classify_document_is_cv(raw_text))
