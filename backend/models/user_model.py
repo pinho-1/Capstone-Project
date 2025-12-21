@@ -27,24 +27,26 @@ class CV(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     status = Column(String, default="processing")
 
-    # Raw extracted text
     raw_text = Column(Text)
 
-    # Scores (as before)
-    clarity_score = Column(Integer)
-    impact_score = Column(Integer)
-    structure_score = Column(Integer)
-    language_score = Column(Integer)
-    overall_score = Column(Integer)
+    clarity_score = Column(Integer, nullable=True)
+    impact_score = Column(Integer, nullable=True)
+    structure_score = Column(Integer, nullable=True)
+    language_score = Column(Integer, nullable=True)
+    overall_score = Column(Integer, nullable=True)
     reasons = Column(JSON, nullable=True)
 
-    # Mentor analysis (new)
+    mentor_highlights = Column(JSON, nullable=True)
     mentor_summary = Column(Text, nullable=True)
+    mentor_signals = Column(JSON, nullable=True)
     mentor_strengths = Column(JSON, nullable=True)
     mentor_improvements = Column(JSON, nullable=True)
     mentor_focus = Column(Text, nullable=True)
 
+    is_cv = Column(Boolean, default=True)
+    score_valid = Column(Boolean, default=True)
+    score_note = Column(String, nullable=True)
+
     updated_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", backref="cvs")
-
