@@ -1,23 +1,26 @@
 """
-Chatbot AI Service with Function Calling
-Handles all chatbot AI interactions including:
-- Job application tracking
-- Company research (web search)
-- General job advice
-- Content generation (cover letters, LinkedIn summaries)
+Chatbot AI Service with Function Calling (NEW SDK)
+- Uses google-genai client from gemini_client.py
+- Uses client.chats.create() so SDK manages history
+- Model chooses tools itself (function calling)
+- Supports tool_result -> function_response -> final answer loop
 """
 
-import google.generativeai as genai
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any, Optional
 import json
-import os
-from datetime import datetime, timedelta
+from langfuse import observe
+import asyncio
+from backend.services.ai.gemini_client import get_client, get_types
 
-# Configure Gemini
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=GEMINI_API_KEY)
+def _is_overloaded_error(e: Exception) -> bool:
+    msg = str(e)
+    return ("503" in msg) or ("UNAVAILABLE" in msg) or ("overloaded" in msg.lower())
 
-# System prompt for the chatbot
+client = get_client()
+types = get_types()
+
+MODEL_NAME = "gemini-2.5-flash-lite"
+
 CHATBOT_SYSTEM_PROMPT = """You are Talentum's AI Career Assistant, a helpful and friendly job search companion.
 
 Your capabilities:
@@ -39,233 +42,185 @@ When users ask about companies or need research, use the web_search function.
 For content generation, use the appropriate generation functions.
 """
 
-# Available tools/functions
-CHATBOT_TOOLS = [
+FUNCTION_DECLARATIONS = [
     {
         "name": "track_application",
-        "description": "Track a new job application with company, role, and date. Use this when user says they applied to a job or wants to track an application.",
+        "description": "Track a new job application with company, role, and date.",
         "parameters": {
             "type": "object",
             "properties": {
-                "company": {
-                    "type": "string",
-                    "description": "The company name"
-                },
-                "role": {
-                    "type": "string",
-                    "description": "The job title/role"
-                },
-                "applied_date": {
-                    "type": "string",
-                    "description": "When they applied (e.g., 'today', '2024-12-19', 'yesterday')"
-                },
-                "job_url": {
-                    "type": "string",
-                    "description": "URL to the job posting if mentioned"
-                },
-                "notes": {
-                    "type": "string",
-                    "description": "Any additional notes about the application"
-                }
+                "company": {"type": "string", "description": "The company name"},
+                "role": {"type": "string", "description": "The job title/role"},
+                "applied_date": {"type": "string", "description": "When they applied (e.g., 'today', '2024-12-19')"},
+                "job_url": {"type": "string", "description": "URL to the job posting if mentioned"},
+                "notes": {"type": "string", "description": "Additional notes"},
             },
-            "required": ["company", "role"]
-        }
+            "required": ["company", "role"],
+        },
     },
     {
         "name": "list_applications",
-        "description": "Show all tracked job applications for the user",
-        "parameters": {
-            "type": "object",
-            "properties": {}
-        }
+        "description": "Show all tracked job applications for the user.",
+        "parameters": {"type": "object", "properties": {}},
     },
     {
         "name": "update_application_status",
-        "description": "Update the status of a job application (e.g., moved to interview, rejected, got offer)",
+        "description": "Update the status of a job application.",
         "parameters": {
             "type": "object",
             "properties": {
-                "application_id": {
-                    "type": "integer",
-                    "description": "The ID of the application to update"
-                },
+                "application_id": {"type": "integer", "description": "The application ID"},
                 "new_status": {
                     "type": "string",
                     "enum": ["applied", "interview", "rejected", "offer", "accepted"],
-                    "description": "The new status"
-                }
+                    "description": "The new status",
+                },
             },
-            "required": ["application_id", "new_status"]
-        }
+            "required": ["application_id", "new_status"],
+        },
     },
     {
         "name": "set_follow_up_reminder",
-        "description": "Set a follow-up reminder for a job application",
+        "description": "Set a follow-up reminder for a job application.",
         "parameters": {
             "type": "object",
             "properties": {
-                "application_id": {
-                    "type": "integer",
-                    "description": "The ID of the application"
-                },
-                "days_from_now": {
-                    "type": "integer",
-                    "description": "How many days from now to follow up (default 14)"
-                }
+                "application_id": {"type": "integer", "description": "The application ID"},
+                "days_from_now": {"type": "integer", "description": "How many days from now to follow up (default 14)"},
             },
-            "required": ["application_id"]
-        }
+            "required": ["application_id"],
+        },
     },
     {
         "name": "web_search",
         "description": "Search the web for information about companies, salaries, interview processes, etc.",
         "parameters": {
             "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "The search query"
-                }
-            },
-            "required": ["query"]
-        }
+            "properties": {"query": {"type": "string", "description": "The search query"}},
+            "required": ["query"],
+        },
     },
     {
         "name": "generate_cover_letter",
-        "description": "Generate a cover letter based on the user's CV and a job description",
+        "description": "Generate a cover letter based on the user's CV and a job description.",
         "parameters": {
             "type": "object",
             "properties": {
-                "job_description": {
-                    "type": "string",
-                    "description": "The job description or key requirements"
-                },
-                "tone": {
-                    "type": "string",
-                    "enum": ["professional", "enthusiastic", "conversational"],
-                    "description": "The tone of the cover letter"
-                }
+                "job_description": {"type": "string", "description": "The job description or key requirements"},
+                "tone": {"type": "string", "enum": ["professional", "enthusiastic", "conversational"]},
             },
-            "required": ["job_description"]
-        }
+            "required": ["job_description"],
+        },
     },
     {
         "name": "generate_linkedin_summary",
-        "description": "Generate a LinkedIn summary/about section based on the user's CV",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "focus": {
-                    "type": "string",
-                    "description": "What to emphasize (e.g., 'data science', 'leadership', 'technical skills')"
-                }
-            }
-        }
-    }
+        "description": "Generate a LinkedIn summary/about section based on the user's CV.",
+        "parameters": {"type": "object", "properties": {"focus": {"type": "string"}}},
+    },
 ]
 
 
-async def get_chatbot_response(
-    user_message: str,
-    chat_history: List[Dict[str, str]],
-    user_cv_text: Optional[str] = None,
-    user_context: Optional[Dict] = None
-) -> Dict[str, Any]:
-    """
-    Generate a chatbot response using Gemini with function calling.
-    
-    Args:
-        user_message: The user's message
-        chat_history: List of previous messages [{"role": "user/assistant", "content": "..."}]
-        user_cv_text: Optional CV text for context
-        user_context: Optional dict with user info (name, job applications, etc.)
-    
-    Returns:
-        Dict with:
-        - response: The assistant's text response
-        - function_call: Optional function call dict if the model wants to use a tool
-        - tool_name: Name of the tool if function_call exists
-    """
-    
-    # Build context
-    context_parts = [CHATBOT_SYSTEM_PROMPT]
-    
-    if user_cv_text:
-        context_parts.append(f"\n\n**User's CV Context:**\n{user_cv_text[:2000]}")  # First 2000 chars
-    
+def build_system_prompt(user_cv_text: Optional[str], user_context: Optional[dict]) -> str:
+    parts = [CHATBOT_SYSTEM_PROMPT]
+
     if user_context:
-        context_parts.append(f"\n\n**User Context:**\n{json.dumps(user_context, indent=2)}")
-    
-    system_prompt = "\n".join(context_parts)
-    
-    # Build conversation history
-    messages = []
-    
-    # Add system context as first message
-    messages.append({
-        "role": "user",
-        "parts": [system_prompt]
-    })
-    messages.append({
-        "role": "model",
-        "parts": ["I understand. I'm ready to help as Talentum's Career Assistant!"]
-    })
-    
-    # Add chat history
-    for msg in chat_history[-10:]:  # Last 10 messages to avoid token limits
-        role = "model" if msg["role"] == "assistant" else "user"
-        messages.append({
-            "role": role,
-            "parts": [msg["content"]]
-        })
-    
-    # Add current message
-    messages.append({
-        "role": "user",
-        "parts": [user_message]
-    })
-    
-    # Create model with function calling
-    model = genai.GenerativeModel(
-        model_name="gemini-1.5-flash",
-        tools=CHATBOT_TOOLS
-    )
-    
+        parts.append("\n\nUser Profile & Onboarding Context (trusted):\n" + json.dumps(user_context, indent=2))
+
+    if user_cv_text:
+        parts.append("\n\nUser CV Extract (trusted):\n" + user_cv_text[:2000])
+
+    return "\n".join(parts)
+
+
+# In-memory session cache
+_CHAT_SESSIONS: Dict[int, Any] = {}
+_CHAT_SYSTEM_HASH: Dict[int, str] = {}
+
+
+def _get_or_create_chat(user_id: int, system_prompt: str):
+    """
+    Creates a stateful chat per user.
+    Recreates the chat if the system prompt changes (e.g., CV updated).
+    """
+    sys_hash = str(hash(system_prompt))
+    if _CHAT_SESSIONS.get(user_id) is None or _CHAT_SYSTEM_HASH.get(user_id) != sys_hash:
+        chat = client.chats.create(
+            model=MODEL_NAME,
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                tools=[types.Tool(function_declarations=FUNCTION_DECLARATIONS)],
+                temperature=0.4,
+            ),
+        )
+        _CHAT_SESSIONS[user_id] = chat
+        _CHAT_SYSTEM_HASH[user_id] = sys_hash
+
+    return _CHAT_SESSIONS[user_id]
+
+
+@observe()
+async def get_chatbot_response(
+    user_id: int,
+    user_message: str,
+    user_cv_text: Optional[str] = None,
+    user_context: Optional[Dict] = None,
+    tool_result: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    system_prompt = build_system_prompt(user_cv_text, user_context)
+    chat = _get_or_create_chat(user_id, system_prompt)
+
     try:
-        # Generate response
-        response = model.generate_content(messages)
-        
-        # Check if model wants to call a function
-        if response.candidates[0].content.parts[0].function_call:
-            function_call = response.candidates[0].content.parts[0].function_call
-            return {
-                "response": None,
-                "function_call": {
-                    "name": function_call.name,
-                    "args": dict(function_call.args)
-                },
-                "tool_name": function_call.name
-            }
-        
-        # Regular text response
-        return {
-            "response": response.text,
-            "function_call": None,
-            "tool_name": None
-        }
-        
+        for attempt in range(3):
+            try:
+                # If we have tool results, send them as a function_response "turn"
+                if tool_result:
+                    resp = chat.send_message([
+                        {
+                            "function_response": {
+                                "name": tool_result["name"],
+                                "response": tool_result["response"],
+                            }
+                        }
+                    ])
+                else:
+                    resp = chat.send_message(user_message)
+
+                # Function calling: new SDK exposes function_calls on the response
+                function_calls = getattr(resp, "function_calls", None)
+                if function_calls:
+                    fc0 = function_calls[0]
+                    return {
+                        "response": None,
+                        "function_call": {"name": fc0.name, "args": dict(fc0.args)},
+                        "tool_name": fc0.name,
+                    }
+
+                return {"response": resp.text, "function_call": None, "tool_name": None}
+            
+            except Exception as e:
+                if attempt < 2 and _is_overloaded_error(e):
+                    await asyncio.sleep(0.5 * (attempt + 1))  # 0.5s, 1.0s, 1.5s
+                    continue
+                raise
+
     except Exception as e:
         print(f"Chatbot error: {e}")
+        # IMPORTANT: return a user-friendly message for overload
+        if _is_overloaded_error(e):
+            return {
+                "response": "The AI is overloaded right now. Try again in a moment.",
+                "function_call": None,
+                "tool_name": None,
+            }
         return {
-            "response": "I apologize, but I encountered an error. Could you try rephrasing your question?",
+            "response": "I hit an error while answering. Try again with a shorter message.",
             "function_call": None,
-            "tool_name": None
+            "tool_name": None,
         }
 
+# ---- Content generators (use new client too) ----
 
 async def generate_cover_letter_content(cv_text: str, job_description: str, tone: str = "professional") -> str:
-    """Generate a cover letter based on CV and job description."""
-    
     prompt = f"""Generate a {tone} cover letter based on this CV and job description.
 
 CV:
@@ -283,16 +238,17 @@ Guidelines:
 
 Generate the cover letter:"""
 
-    model = genai.GenerativeModel("gemini-1.5-flash")
-    response = model.generate_content(prompt)
-    return response.text
+    resp = client.models.generate_content(
+        model=MODEL_NAME,
+        contents=prompt,
+        config=types.GenerateContentConfig(temperature=0.6),
+    )
+    return resp.text
 
 
 async def generate_linkedin_summary_content(cv_text: str, focus: Optional[str] = None) -> str:
-    """Generate a LinkedIn summary from CV."""
-    
     focus_text = f" with emphasis on {focus}" if focus else ""
-    
+
     prompt = f"""Generate a compelling LinkedIn 'About' section based on this CV{focus_text}.
 
 CV:
@@ -307,6 +263,9 @@ Guidelines:
 
 Generate the LinkedIn summary:"""
 
-    model = genai.GenerativeModel("gemini-1.5-flash")
-    response = model.generate_content(prompt)
-    return response.text
+    resp = client.models.generate_content(
+        model=MODEL_NAME,
+        contents=prompt,
+        config=types.GenerateContentConfig(temperature=0.6),
+    )
+    return resp.text

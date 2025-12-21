@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from backend.database import get_db
-from backend.models.user_model import CV
+from backend.models.cv_model import CV
 from backend.routers.auth import get_current_user
 from backend.services.ai.career_match import analyze_career_match
 import os, json

@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from sqlalchemy.orm import Session
 from backend.database import get_db, SessionLocal
 from backend.routers.auth import get_current_user
-from backend.models.user_model import CV
+from backend.models.cv_model import CV
 from fastapi.templating import Jinja2Templates
 from markupsafe import Markup, escape
 import re

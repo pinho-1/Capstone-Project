@@ -2,9 +2,11 @@ from fastapi import APIRouter, Request, Depends, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from langfuse import observe, get_client
 from backend.database import get_db
 from backend.routers.auth import get_current_user
-from backend.models.user_model import ChatMessage, JobApplication, CV
+from backend.models.chat_model import ChatMessage, JobApplication
+from backend.models.cv_model import CV
 from backend.services.ai.chatbot_service import (
     get_chatbot_response,
     generate_cover_letter_content,
@@ -13,7 +15,7 @@ from backend.services.ai.chatbot_service import (
 from datetime import datetime, timedelta
 import os
 
-router = APIRouter(prefix="/chat", tags=["chat"])
+router = APIRouter(tags=["chat"])
 
 FRONTEND_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -21,116 +23,141 @@ FRONTEND_DIR = os.path.join(
 )
 templates = Jinja2Templates(directory=FRONTEND_DIR)
 
+def safe_langfuse_client():
+    if os.getenv("LANGFUSE_PUBLIC_KEY") and os.getenv("LANGFUSE_SECRET_KEY"):
+        return get_client()
+    return None
 
 # ========== Send Message ==========
+def chat_session_id(user_id: int) -> str:
+    return f"talentum_chat_user_{user_id}"
+
 @router.post("/message", response_class=JSONResponse)
+@observe()
 async def send_message(
     request: Request,
     message: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    """Handle user message and return chatbot response."""
-    
     user = get_current_user(request, db)
     if not user:
         return JSONResponse({"error": "Not authenticated"}, status_code=401)
-    
+
+    langfuse = safe_langfuse_client()
+    if langfuse:
+        langfuse.update_current_trace(
+            session_id=chat_session_id(user.id),
+            tags=["chatbot", "multi-turn", "talentum"],
+            metadata={
+                "user_id": user.id,
+                "endpoint": "/chat/message"
+            }
+        )
+
     # Save user message
-    user_msg = ChatMessage(
-        user_id=user.id,
-        role="user",
-        content=message
-    )
+    user_msg = ChatMessage(user_id=user.id, role="user", content=message)
     db.add(user_msg)
     db.commit()
-    
-    # Get chat history (last 10 messages)
-    history = db.query(ChatMessage).filter(
-        ChatMessage.user_id == user.id
-    ).order_by(ChatMessage.created_at.desc()).limit(10).all()
-    
-    chat_history = [
-        {"role": msg.role, "content": msg.content}
-        for msg in reversed(history[:-1])  # Exclude the message we just added
-    ]
-    
-    # Get user's CV for context
+
+    # History
+    history = db.query(ChatMessage)\
+        .filter(ChatMessage.user_id == user.id)\
+        .order_by(ChatMessage.created_at.asc())\
+        .all()
+
+    chat_history = [{"role": m.role, "content": m.content} for m in history[:-1]]
+
+    # CV context
     latest_cv = db.query(CV).filter(
         CV.user_id == user.id,
         CV.raw_text != None
     ).order_by(CV.updated_at.desc()).first()
-    
+
     cv_text = latest_cv.raw_text if latest_cv else None
-    
-    # Get user's job applications for context
+
     applications = db.query(JobApplication).filter(
         JobApplication.user_id == user.id
     ).order_by(JobApplication.applied_date.desc()).all()
-    
+
+    # IMPORTANT: Do not put cv_text in Langfuse metadata.
     user_context = {
         "name": user.name,
-        "has_cv": cv_text is not None,
-        "total_applications": len(applications),
-        "recent_applications": [
-            {
-                "id": app.id,
-                "company": app.company,
-                "role": app.role,
-                "status": app.status,
-                "applied_date": app.applied_date.isoformat()
-            }
-            for app in applications[:3]  # Last 3 applications
-        ]
+        "onboarding": {
+            "career_stage": user.career_stage,
+            "interest": user.interest,
+            "goal": user.goal,
+            "experience_years": user.experience,
+            "focus": user.focus,
+            "onboarding_complete": user.onboarding_complete
+        },
+        "apps": {
+            "total": len(applications),
+            "recent": [{"id": a.id, "company": a.company, "role": a.role, "status": a.status} for a in applications[:3]]
+        },
+        "cv_meta": {
+            "has_cv": cv_text is not None,
+            "scores": {
+                "overall": latest_cv.overall_score if latest_cv else None
+            } if latest_cv else None
+        }
     }
-    
-    # Get AI response
+
+    # Nested trace: LLM call
     ai_result = await get_chatbot_response(
+        user_id=user.id,
         user_message=message,
-        chat_history=chat_history,
         user_cv_text=cv_text,
         user_context=user_context
     )
-    
-    # Handle function calls
+
+    if ai_result["response"] and "overloaded" in ai_result["response"].lower():
+        return JSONResponse({"response": ai_result["response"]}, status_code=503)
+
+    # Tool call path (nested trace inside handle_function_call)
     if ai_result["function_call"]:
-        function_result = await handle_function_call(
+        tool_payload = await handle_function_call(
             ai_result["function_call"],
             user.id,
             db,
             cv_text
         )
-        
-        # Save the function result as assistant message
+
+        # second nested LLM call using tool result
+        final = await get_chatbot_response(
+            user_id=user.id,
+            user_message=message,
+            user_cv_text=cv_text,
+            user_context=user_context,
+            tool_result={
+                "name": ai_result["tool_name"],
+                "response": {
+                    "message": tool_payload["message"],
+                    "data": tool_payload.get("data")
+                }
+            }
+        )
+
+        final_text = final["response"] or tool_payload["message"]
+
         assistant_msg = ChatMessage(
             user_id=user.id,
             role="assistant",
-            content=function_result["message"],
+            content=final_text,
             function_call=ai_result["function_call"]
         )
         db.add(assistant_msg)
         db.commit()
-        
-        return JSONResponse({
-            "response": function_result["message"],
-            "function_used": ai_result["tool_name"],
-            "data": function_result.get("data")
-        })
-    
-    # Save assistant response
-    assistant_msg = ChatMessage(
-        user_id=user.id,
-        role="assistant",
-        content=ai_result["response"]
-    )
+
+        return JSONResponse({"response": final_text, "function_used": ai_result["tool_name"]})
+
+    assistant_msg = ChatMessage(user_id=user.id, role="assistant", content=ai_result["response"])
     db.add(assistant_msg)
     db.commit()
-    
-    return JSONResponse({
-        "response": ai_result["response"]
-    })
 
+    return JSONResponse({"response": ai_result["response"]})
 
 # ========== Handle Function Calls ==========
+@observe()
 async def handle_function_call(
     function_call: dict,
     user_id: int,
@@ -138,7 +165,7 @@ async def handle_function_call(
     cv_text: str = None
 ) -> dict:
     """Execute the requested function and return results."""
-    
+
     func_name = function_call["name"]
     args = function_call["args"]
     
