@@ -14,12 +14,23 @@ def _model(system_prompt: str):
         system_instruction=system_prompt
     )
 
-async def generate_json(system_prompt: str, user_payload: dict) -> dict:
+async def generate_json(system_prompt: str, user_payload: dict, temperature: float = 0.4) -> dict:
+    """
+    temperature:
+      - 0.0 = (mostly) deterministic / reproducible
+      - 0.3–0.6 = more natural phrasing for mentor-style text
+    """
     try:
         model = _model(system_prompt)
+
         resp = model.generate_content(
             json.dumps(user_payload),
-            generation_config={"response_mime_type": "application/json"}
+            generation_config={
+                "response_mime_type": "application/json",
+                "temperature": float(temperature),
+                "top_p": 1.0,
+                "candidate_count": 1,
+            },
         )
         return json.loads(resp.text)
     except Exception as e:
