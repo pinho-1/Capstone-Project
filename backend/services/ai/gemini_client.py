@@ -1,25 +1,82 @@
 import os
 import json
-import google.generativeai as genai
+from typing import Any, Optional, Dict, List
+from google import genai
+from google.genai import types
+from langfuse import observe
 
 API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
     raise RuntimeError("GEMINI_API_KEY not set in environment")
 
-genai.configure(api_key=API_KEY)
+client = genai.Client(api_key=API_KEY)
 
-def _model(system_prompt: str):
-    return genai.GenerativeModel(
-        model_name="gemini-2.5-flash-lite",
-        system_instruction=system_prompt
+DEFAULT_MODEL = "gemini-2.5-flash-lite"
+
+def get_client():
+    return client
+
+def get_types():
+    return types
+
+@observe()
+def make_chat(
+    system_prompt: str,
+    function_declarations: Optional[List[dict]] = None,
+    model: str = DEFAULT_MODEL,
+):
+    """
+    Creates a stateful chat session (SDK manages history).
+    If function_declarations provided, enables tool use (function calling).
+    """
+    tools = []
+    if function_declarations:
+        tools = [types.Tool(function_declarations=function_declarations)]
+
+    config = types.GenerateContentConfig(
+        system_instruction=system_prompt,
+        tools=tools if tools else None,
+        # keep default AUTO function calling (model decides)
     )
 
-async def generate_json(system_prompt: str, user_payload: dict) -> dict:
+    return client.chats.create(model=model, config=config)
+
+@observe()
+def generate_text(
+    system_prompt: str,
+    user_text: str,
+    model: str = DEFAULT_MODEL,
+    temperature: float = 0.5,
+) -> str:
+    config = types.GenerateContentConfig(
+        system_instruction=system_prompt,
+        temperature=float(temperature),
+    )
+    resp = client.models.generate_content(model=model, contents=user_text, config=config)
+    return resp.text
+
+@observe()
+async def generate_json(
+    system_prompt: str,
+    user_payload: dict,
+    temperature: float = 0.4,
+    model: str = DEFAULT_MODEL,
+) -> dict:
+    """
+    Keeps your existing JSON mode behavior (for consistency with other pages).
+    """
     try:
-        model = _model(system_prompt)
-        resp = model.generate_content(
-            json.dumps(user_payload),
-            generation_config={"response_mime_type": "application/json"}
+        config = types.GenerateContentConfig(
+            system_instruction=system_prompt,
+            response_mime_type="application/json",
+            temperature=float(temperature),
+            top_p=1.0,
+            candidate_count=1,
+        )
+        resp = client.models.generate_content(
+            model=model,
+            contents=json.dumps(user_payload),
+            config=config,
         )
         return json.loads(resp.text)
     except Exception as e:

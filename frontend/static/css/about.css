@@ -1,0 +1,90 @@
+.about-page{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: calc(var(--nav-h, 72px) + 1.5rem) 1.25rem 2rem;
+}
+
+.about-card{
+  padding: 1.6rem 1.8rem;
+}
+
+.about-grid{
+  margin-top: 1.2rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.about-item{
+  background: rgba(255,255,255,0.65);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+}
+
+.about-item h3{
+  margin: 0 0 0.5rem 0;
+  color: #0f3550;
+}
+
+.about-item ul{
+  margin: 0.25rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.about-cta{
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1.4rem;
+  flex-wrap: wrap;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0.7rem 1.4rem;
+  border-radius: 9999px;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.2px;
+
+  border: 2px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+/* Primary */
+.btn.primary {
+  background: #2e6a84;
+  color: #ffffff;
+  border-color: #2e6a84;
+}
+
+.btn.primary:hover {
+  background-color: #0a5473;
+  border-color: #0a5473;
+  transform: translateY(-2px);
+}
+
+/* Secondary */
+.btn.secondary {
+  background: rgba(255, 255, 255, 0.55);
+  color: #2e6a84;
+  border-color: rgba(46, 106, 132, 0.35);
+}
+
+.btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: #2e6a84;
+  transform: translateY(-2px);
+}

@@ -1,0 +1,140 @@
+{# ===============================
+   Career Match – Right Panel
+   partials/cm_match_panel.html
+   =============================== #}
+
+{# 1) No job at all (invalid job id) #}
+{% if not job and not missing_cv %}
+  <div class="cm-match-card cm-match-placeholder">
+    <p>Something went wrong.</p>
+    <p class="cm-no-results-sub">
+      We couldn’t analyze this role. Please try another job.
+    </p>
+  </div>
+
+{# 2) Job selected but user has NO CV yet #}
+{% elif missing_cv %}
+  <div class="cm-match-card cm-match-placeholder">
+    <h3>No CV found for this analysis</h3>
+    <p>
+      To analyze your fit for
+      <strong>{{ job.title }}</strong> at <strong>{{ job.company }}</strong>,
+      you’ll need to upload a CV first.
+    </p>
+    <p class="cm-no-results-sub">
+      We’ll use your latest CV automatically for all future career matches.
+    </p>
+    <a href="/cv" class="btn primary" style="margin-top: 0.8rem;">
+      Upload my CV
+    </a>
+  </div>
+
+{# 3) Normal case – job + CV available #}
+{% else %}
+  <div class="cm-match-card">
+
+    <header class="cm-match-header">
+      <div>
+        <p class="cm-match-label">Selected role</p>
+
+        <h2 class="cm-match-title">
+          {{ job.title }} · {{ job.company }}
+        </h2>
+
+        <p class="cm-match-meta">
+          {{ job.location }} · {{ job.mode }} · {{ job.level }}
+        </p>
+
+        {% if cv_uploaded_at %}
+          <p class="cm-cv-note">
+            Based on your CV uploaded on {{ cv_uploaded_at.strftime("%d %b %Y") }}
+          </p>
+        {% endif %}
+      </div>
+
+      <div class="cm-score-circle">
+        <div class="cm-score-number">{{ match_score }}</div>
+        <div class="cm-score-caption">MATCH</div>
+      </div>
+    </header>
+
+    <div class="cm-badges-row">
+      {% if seniority_fit %}
+        <span class="cm-badge cm-badge--good">{{ seniority_fit }}</span>
+      {% endif %}
+      {% if skills_summary %}
+        <span class="cm-badge cm-badge--neutral">{{ skills_summary }}</span>
+      {% endif %}
+    </div>
+
+    {# Optional 1-liner reason (only show if you want it) #}
+    {% if reason %}
+      <p class="cm-match-reason">{{ reason }}</p>
+    {% endif %}
+
+    {# ===============================
+       Sections as “blocks with icons”
+       =============================== #}
+
+    <section class="cm-section">
+      <h3 class="cm-section-title">Where you shine</h3>
+
+      <div class="cm-block-list">
+        {% if strengths and strengths|length > 0 %}
+          {% for s in strengths %}
+            <div class="cm-block cm-block--good">
+              <div class="cm-block-icon" aria-hidden="true">✅</div>
+              <div class="cm-block-body">{{ s }}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="cm-block cm-block--neutral">
+            <div class="cm-block-icon" aria-hidden="true">ℹ️</div>
+            <div class="cm-block-body">No strengths identified yet for this role.</div>
+          </div>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="cm-section">
+      <h3 class="cm-section-title">To strengthen your application</h3>
+
+      <div class="cm-block-list">
+        {% if gaps and gaps|length > 0 %}
+          {% for g in gaps %}
+            <div class="cm-block cm-block--warn">
+              <div class="cm-block-icon" aria-hidden="true">⚠️</div>
+              <div class="cm-block-body">{{ g }}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="cm-block cm-block--neutral">
+            <div class="cm-block-icon" aria-hidden="true">✅</div>
+            <div class="cm-block-body">No specific gaps identified. You’re broadly aligned.</div>
+          </div>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="cm-section">
+      <h3 class="cm-section-title">Next steps</h3>
+
+      <div class="cm-block-list">
+        {% if next_steps and next_steps|length > 0 %}
+          {% for step in next_steps %}
+            <div class="cm-block cm-block--step">
+              <div class="cm-block-icon" aria-hidden="true">➡️</div>
+              <div class="cm-block-body">{{ step }}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="cm-block cm-block--neutral">
+            <div class="cm-block-icon" aria-hidden="true">➡️</div>
+            <div class="cm-block-body">Tailor your CV bullets to this role’s must-have skills.</div>
+          </div>
+        {% endif %}
+      </div>
+    </section>
+
+  </div>
+{% endif %}

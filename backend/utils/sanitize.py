@@ -2,10 +2,9 @@ import html
 import re
 
 def sanitize_text(value: str) -> str:
-    """Escape HTML, strip control chars, and collapse spacing."""
+    """Strip control chars, and collapse spacing."""
     if not value:
         return ""
-    value = html.escape(value)
     value = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", value)
     value = re.sub(r"\s{2,}", " ", value)
     return value.strip()

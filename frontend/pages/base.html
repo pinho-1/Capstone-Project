@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Talentum</title>
     <link rel="stylesheet" href="{{ url_for('static', path='/css/base.css') }}">
+    <link rel="icon" href="{{ url_for('static', path='Talentum icon.png') }}">
     {% block extra_css %}{% endblock %}
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
@@ -28,7 +29,7 @@
           <ul>
             {% if user %}
               <li><a href="/chat" class="nav-link {% if current_path.startswith('/chat') %}nav-link--active{% endif %}">Chatbot</a></li>
-              <li><a href="/cv" class="nav-link {% if current_path.startswith('/cv') %}nav-link--active{% endif %}">CV Upload</a></li>
+              <li><a href="/cv" class="nav-link {% if current_path.startswith('/cv') %}nav-link--active{% endif %}">CV Analyzer</a></li>
               <li><a href="/interviews" class="nav-link {% if current_path.startswith('/interviews') %}nav-link--active{% endif %}">Interviews</a></li>
               <li><a href="/cm" class="nav-link {% if current_path.startswith('/cm') %}nav-link--active{% endif %}">Career Match</a></li>
             {% else %}
@@ -54,10 +55,10 @@
               </svg>
             </button>
             <div class="dropdown">
-              <a href="/profile"><span class="label">Profile</span></a>
-              <a href="/dashboard"><span class="label">Dashboard</span></a>
+              <a href="#"><span class="label">Profile</span></a>
+              <a href="#"><span class="label">Dashboard</span></a>
               <a href="/onboarding?update=true"><span class="label">Preferences</span></a>
-              <a href="/settings"><span class="label">Settings</span></a>
+              <a href="#"><span class="label">Settings</span></a>
               <a href="/auth/logout"><span class="label">Log out</span></a>
             </div>
 

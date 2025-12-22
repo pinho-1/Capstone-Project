@@ -1,38 +1,77 @@
-<!-- frontend/pages/partials/topic_card.html -->
- 
-<article class="topic-card" id="card-{{ card.id }}">
-  <h4>{{ card.title }}</h4>
-  <div class="topic-meta">{{ card.subtitle }}</div>
+<div class="topic-card" id="card-{{ card.id }}" data-card-id="{{ card.id }}"
+ {% if card.subtitle and "Marked as done" in card.subtitle %}data-status="done"{% else %}data-status="active"{% endif %}>
 
-  <ul>
-    {% for tip in card.tips %}
-      <li>{{ tip|safe }}</li>
-    {% endfor %}
-  </ul>
-
-  {% if card.example %}
-    <div class="ai-response" style="margin-top:.6rem">
-      <strong>Example:</strong> {{ card.example|safe }}
-    </div>
-  {% endif %}
-
-  <div class="topic-actions">
-    <button class="btn ghost"
-            hx-post="/cv/card/variant"
-            hx-vals='{"card_id":"{{ card.id }}"}'
-            hx-target="#card-{{ card.id }}"
-            hx-swap="outerHTML">Another example</button>
-
-    <button class="btn primary"
-            hx-post="/cv/card/accept"
-            hx-vals='{"card_id":"{{ card.id }}"}'
-            hx-target="#card-{{ card.id }}"
-            hx-swap="outerHTML">Mark done</button>
-
-    <button class="btn ghost"
-            hx-delete="/cv/card"
-            hx-vals='{"card_id":"{{ card.id }}"}'
-            hx-target="#card-{{ card.id }}"
-            hx-swap="outerHTML">Dismiss</button>
+  <div class="topic-top">
+    <h4>{{ card.title }}</h4>
+    <div class="topic-meta">{{ card.subtitle }}</div>
   </div>
-</article>
+
+  {# DONE STATE (compact) #}
+  {% if card.subtitle and "Marked as done" in card.subtitle %}
+    <div class="topic-done-row">
+      <span class="done-pill">Done</span>
+      <button
+        class="btn ghost small"
+        hx-delete="/cv/card?card_id={{ card.id }}"
+        hx-target="#card-{{ card.id }}"
+        hx-swap="outerHTML">
+        Dismiss
+      </button>
+    </div>
+
+  {% else %}
+
+    <ul class="topic-tips">
+      {% for tip in card.tips %}
+        <li>{{ tip }}</li>
+      {% endfor %}
+    </ul>
+
+    <details class="topic-example">
+      <summary>Show example</summary>
+
+      <div class="example-wrap">
+        <div class="example-loading htmx-indicator">Updating…</div>
+
+        <div class="example-box" id="example-{{ card.id }}">
+          {{ card.example | safe }}
+        </div>
+      </div>
+
+      <form class="topic-actions" hx-encoding="multipart/form-data">
+        <input type="hidden" name="card_id" value="{{ card.id }}"/>
+
+        <button
+          type="button"
+          class="btn ghost small"
+          hx-post="/cv/card/variant"
+          hx-include="closest form"
+          hx-target="#example-{{ card.id }}"
+          hx-swap="innerHTML"
+          hx-indicator="#card-{{ card.id }} .example-loading">
+          Another example
+        </button>
+
+        <button
+          type="button"
+          class="btn primary small"
+          hx-post="/cv/card/accept"
+          hx-include="closest form"
+          hx-target="#card-{{ card.id }}"
+          hx-swap="outerHTML">
+          Mark done
+        </button>
+
+        <button
+          type="button"
+          class="btn ghost small"
+          hx-delete="/cv/card?card_id={{ card.id }}"
+          hx-target="#card-{{ card.id }}"
+          hx-swap="outerHTML">
+          Dismiss
+        </button>
+      </form>
+    </details>
+
+  {% endif %}
+</div>

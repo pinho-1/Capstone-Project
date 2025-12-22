@@ -1,62 +1,908 @@
 [
   {
     "id": 1,
-    "title": "Data Analyst",
-    "company": "Nimbus Analytics",
-    "location": "Porto",
-    "mode": "Hybrid",
-    "level": "Mid-level",
-    "snippet": "Work with SQL, dashboards, and business stakeholders to turn data into decisions.",
-    "description": "Own analytics projects end-to-end, build dashboards, and support business teams with insights.",
-    "tags": ["SQL", "Power BI", "Dashboarding", "Business Analysis"],
+    "title": "Sustainability Analyst",
+    "company": "BlueWave Media",
+    "location": "London",
+    "mode": "Remote",
+    "level": "Junior",
+    "snippet": "Work with data to support faster and better decision-making.",
+    "description": "You will own problems end-to-end: gather requirements, prepare and analyze data, and present evidence-based recommendations. You will collaborate closely with product, business, and engineering teams.",
+    "tags": [
+      "Forecasting",
+      "GIS",
+      "Excel",
+      "Communication",
+      "Time Series"
+    ],
     "remote_friendly": true
   },
   {
     "id": 2,
-    "title": "Junior Business Intelligence Specialist",
-    "company": "Aurora Bank",
-    "location": "Remote (EU)",
-    "mode": "Remote",
-    "level": "Junior",
-    "snippet": "Support BI reporting, maintain ETL pipelines, and help deliver insights to business units.",
-    "description": "Entry-level BI role focused on reporting, maintaining data pipelines, and assisting senior analysts.",
-    "tags": ["SQL", "ETL", "Reporting", "Banking"],
+    "title": "BI Analyst",
+    "company": "Kite AI",
+    "location": "Faro",
+    "mode": "Hybrid",
+    "level": "Intern",
+    "snippet": "Transform metrics and system logs into actionable insights for teams.",
+    "description": "You will be responsible for maintaining clean and reliable datasets, defining KPIs, automating reports, and supporting data-driven decision-making. Strong communication skills and attention to detail are essential.",
+    "tags": [
+      "dbt",
+      "Communication",
+      "Git",
+      "SQL",
+      "Python"
+    ],
     "remote_friendly": true
   },
   {
     "id": 3,
-    "title": "Product Data Associate",
-    "company": "Helix Labs",
-    "location": "Lisbon",
-    "mode": "On-site",
-    "level": "Entry / Mid-level",
-    "snippet": "Bridge product and data: track KPIs, run experiments, and help prioritize features.",
-    "description": "Work closely with product managers to track metrics, analyze data, and support product decisions.",
-    "tags": ["KPIs", "Product", "Experiments"],
-    "remote_friendly": false
+    "title": "Churn Analyst",
+    "company": "Dockyard Data",
+    "location": "Barcelona",
+    "mode": "Hybrid",
+    "level": "Senior",
+    "snippet": "Design dashboards and automate reporting for key stakeholders.",
+    "description": "You will build and maintain batch and streaming data pipelines, ensure data quality, and deliver analytics-ready datasets. You will work with cloud platforms and modern version control practices.",
+    "tags": [
+      "Git",
+      "Statistics",
+      "Time Series",
+      "Excel"
+    ],
+    "remote_friendly": true
   },
   {
     "id": 4,
-    "title": "Marketing Data Analyst",
+    "title": "Product Analyst",
     "company": "BlueWave Media",
-    "location": "Madrid",
-    "mode": "Hybrid",
-    "level": "Mid-level",
-    "snippet": "Analyze campaign performance and build dashboards for the marketing team.",
-    "description": "Help optimize digital campaigns through data insights and reporting automation.",
-    "tags": ["Marketing Analytics", "Google Analytics", "Data Visualization"],
+    "location": "Paris",
+    "mode": "Remote",
+    "level": "Junior",
+    "snippet": "Build, clean, validate, and publish datasets for analytics and modeling.",
+    "description": "This role focuses on continuous improvement: measuring performance, diagnosing issues, proposing actions, and tracking impact. You will work directly with stakeholders to align on objectives.",
+    "tags": [
+      "Amplitude",
+      "Communication",
+      "Product Strategy",
+      "Git",
+      "Stakeholder Management"
+    ],
     "remote_friendly": true
   },
   {
     "id": 5,
-    "title": "Operations Analyst",
+    "title": "Manufacturing Analyst",
+    "company": "Vela Retail",
+    "location": "Coimbra",
+    "mode": "Hybrid",
+    "level": "Lead",
+    "snippet": "Support experimentation and A/B testing to optimize products.",
+    "description": "You will own problems end-to-end: gather requirements, prepare and analyze data, and present evidence-based recommendations. You will collaborate closely with product, business, and engineering teams.",
+    "tags": [
+      "IoT",
+      "Git",
+      "Excel",
+      "OEE",
+      "Data Visualization"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 6,
+    "title": "Reporting Specialist",
+    "company": "Nova Consulting",
+    "location": "Warsaw",
+    "mode": "Hybrid",
+    "level": "Mid-level",
+    "snippet": "Monitor performance, detect anomalies, and drive continuous improvement.",
+    "description": "You will be responsible for maintaining clean and reliable datasets, defining KPIs, automating reports, and supporting data-driven decision-making. Strong communication skills and attention to detail are essential.",
+    "tags": [
+      "Python",
+      "dbt",
+      "Stakeholder Management",
+      "Power BI"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 7,
+    "title": "Compensation Analyst (Data)",
+    "company": "Quanta Robotics",
+    "location": "Setúbal",
+    "mode": "Hybrid",
+    "level": "Mid-level",
+    "snippet": "Work with data to support faster and better decision-making.",
+    "description": "You will build and maintain batch and streaming data pipelines, ensure data quality, and deliver analytics-ready datasets. You will work with cloud platforms and modern version control practices.",
+    "tags": [
+      "Stakeholder Management",
+      "Git",
+      "Communication",
+      "Statistics",
+      "Excel"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 8,
+    "title": "Demand Planner (Data)",
+    "company": "Sierra Insurance",
+    "location": "Dublin",
+    "mode": "Hybrid",
+    "level": "Lead",
+    "snippet": "Transform metrics and system logs into actionable insights for teams.",
+    "description": "This role focuses on continuous improvement: measuring performance, diagnosing issues, proposing actions, and tracking impact. You will work directly with stakeholders to align on objectives.",
+    "tags": [
+      "Marketing Analytics",
+      "Git",
+      "Communication",
+      "Excel",
+      "Stakeholder Management"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 9,
+    "title": "UA Analyst",
+    "company": "GreenSpark Energy",
+    "location": "Paris",
+    "mode": "Remote",
+    "level": "Junior",
+    "snippet": "Design dashboards and automate reporting for key stakeholders.",
+    "description": "You will own problems end-to-end: gather requirements, prepare and analyze data, and present evidence-based recommendations. You will collaborate closely with product, business, and engineering teams.",
+    "tags": [
+      "Player Analytics",
+      "Statistics",
+      "Funnel Analysis",
+      "Excel",
+      "Communication",
+      "Stakeholder Management"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 10,
+    "title": "Data Governance Analyst",
+    "company": "Atlas Systems",
+    "location": "Stockholm",
+    "mode": "On-site",
+    "level": "Intern",
+    "snippet": "Build, clean, validate, and publish datasets for analytics and modeling.",
+    "description": "You will be responsible for maintaining clean and reliable datasets, defining KPIs, automating reports, and supporting data-driven decision-making. Strong communication skills and attention to detail are essential.",
+    "tags": [
+      "Communication",
+      "Git",
+      "EHR",
+      "Statistics",
+      "Python",
+      "Clinical Analytics"
+    ],
+    "remote_friendly": false
+  },
+  {
+    "id": 11,
+    "title": "Insights Analyst",
+    "company": "GreenSpark Energy",
+    "location": "Paris",
+    "mode": "Hybrid",
+    "level": "Senior",
+    "snippet": "Support experimentation and A/B testing to optimize products.",
+    "description": "You will build and maintain batch and streaming data pipelines, ensure data quality, and deliver analytics-ready datasets. You will work with cloud platforms and modern version control practices.",
+    "tags": [
+      "dbt",
+      "SQL",
+      "Tableau",
+      "Looker",
+      "Power BI",
+      "Communication"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 12,
+    "title": "Game Data Scientist",
+    "company": "Skyline Telecom",
+    "location": "Remote (EU)",
+    "mode": "Hybrid",
+    "level": "Mid-level",
+    "snippet": "Monitor performance, detect anomalies, and drive continuous improvement.",
+    "description": "This role focuses on continuous improvement: measuring performance, diagnosing issues, proposing actions, and tracking impact. You will work directly with stakeholders to align on objectives.",
+    "tags": [
+      "Player Analytics",
+      "Excel",
+      "Git",
+      "Stakeholder Management"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 13,
+    "title": "Platform Data Engineer",
+    "company": "Dockyard Data",
+    "location": "Barcelona",
+    "mode": "Remote",
+    "level": "Lead",
+    "snippet": "Work with data to support faster and better decision-making.",
+    "description": "You will own problems end-to-end: gather requirements, prepare and analyze data, and present evidence-based recommendations. You will collaborate closely with product, business, and engineering teams.",
+    "tags": [
+      "AWS",
+      "Git",
+      "GCP",
+      "dbt",
+      "Kafka",
+      "Spark"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 14,
+    "title": "Risk Analyst",
+    "company": "Nimbus Analytics",
+    "location": "London",
+    "mode": "On-site",
+    "level": "Junior",
+    "snippet": "Transform metrics and system logs into actionable insights for teams.",
+    "description": "You will be responsible for maintaining clean and reliable datasets, defining KPIs, automating reports, and supporting data-driven decision-making. Strong communication skills and attention to detail are essential.",
+    "tags": [
+      "Communication",
+      "Git",
+      "Python",
+      "Excel",
+      "Statistics",
+      "SQL"
+    ],
+    "remote_friendly": false
+  },
+  {
+    "id": 15,
+    "title": "LiveOps Analyst",
+    "company": "Vela Retail",
+    "location": "Madrid",
+    "mode": "Remote",
+    "level": "Junior",
+    "snippet": "Design dashboards and automate reporting for key stakeholders.",
+    "description": "You will build and maintain batch and streaming data pipelines, ensure data quality, and deliver analytics-ready datasets. You will work with cloud platforms and modern version control practices.",
+    "tags": [
+      "Stakeholder Management",
+      "SQL",
+      "Git",
+      "Funnel Analysis"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 16,
+    "title": "Security Data Analyst",
+    "company": "Skyline Telecom",
+    "location": "Remote (EU)",
+    "mode": "Hybrid",
+    "level": "Mid-level",
+    "snippet": "Build, clean, validate, and publish datasets for analytics and modeling.",
+    "description": "This role focuses on continuous improvement: measuring performance, diagnosing issues, proposing actions, and tracking impact. You will work directly with stakeholders to align on objectives.",
+    "tags": [
+      "Git",
+      "Communication",
+      "SIEM",
+      "Incident Response",
+      "Threat Modeling",
+      "Stakeholder Management"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 17,
+    "title": "Audit Analyst",
+    "company": "Atlas Systems",
+    "location": "Warsaw",
+    "mode": "Remote",
+    "level": "Mid-level",
+    "snippet": "Support experimentation and A/B testing to optimize products.",
+    "description": "You will own problems end-to-end: gather requirements, prepare and analyze data, and present evidence-based recommendations. You will collaborate closely with product, business, and engineering teams.",
+    "tags": [
+      "Git",
+      "Excel",
+      "SQL",
+      "Statistics",
+      "Stakeholder Management"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 18,
+    "title": "People Analyst",
+    "company": "TerraClimate",
+    "location": "Berlin",
+    "mode": "Hybrid",
+    "level": "Senior",
+    "snippet": "Monitor performance, detect anomalies, and drive continuous improvement.",
+    "description": "You will be responsible for maintaining clean and reliable datasets, defining KPIs, automating reports, and supporting data-driven decision-making. Strong communication skills and attention to detail are essential.",
+    "tags": [
+      "Stakeholder Management",
+      "Communication",
+      "People Analytics",
+      "Dashboards"
+    ],
+    "remote_friendly": false
+  },
+  {
+    "id": 19,
+    "title": "GRC Analyst",
+    "company": "Helix Labs",
+    "location": "Stockholm",
+    "mode": "Hybrid",
+    "level": "Entry-level",
+    "snippet": "Work with data to support faster and better decision-making.",
+    "description": "You will build and maintain batch and streaming data pipelines, ensure data quality, and deliver analytics-ready datasets. You will work with cloud platforms and modern version control practices.",
+    "tags": [
+      "Excel",
+      "Incident Response",
+      "Threat Modeling",
+      "SIEM",
+      "Communication"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 20,
+    "title": "Data Analyst",
+    "company": "TerraClimate",
+    "location": "Remote (Worldwide)",
+    "mode": "On-site",
+    "level": "Junior",
+    "snippet": "Transform metrics and system logs into actionable insights for teams.",
+    "description": "This role focuses on continuous improvement: measuring performance, diagnosing issues, proposing actions, and tracking impact. You will work directly with stakeholders to align on objectives.",
+    "tags": [
+      "dbt",
+      "Python",
+      "Git",
+      "Statistics"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 21,
+    "title": "Workforce Planning Analyst",
+    "company": "Sierra Insurance",
+    "location": "Remote (EU)",
+    "mode": "On-site",
+    "level": "Intern",
+    "snippet": "Design dashboards and automate reporting for key stakeholders.",
+    "description": "You will own problems end-to-end: gather requirements, prepare and analyze data, and present evidence-based recommendations. You will collaborate closely with product, business, and engineering teams.",
+    "tags": [
+      "HRIS",
+      "Statistics",
+      "People Analytics",
+      "Git",
+      "Stakeholder Management",
+      "Communication"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 22,
+    "title": "KYC Analyst",
+    "company": "TerraClimate",
+    "location": "Milan",
+    "mode": "Hybrid",
+    "level": "Senior",
+    "snippet": "Build, clean, validate, and publish datasets for analytics and modeling.",
+    "description": "You will be responsible for maintaining clean and reliable datasets, defining KPIs, automating reports, and supporting data-driven decision-making. Strong communication skills and attention to detail are essential.",
+    "tags": [
+      "KYC",
+      "SQL",
+      "Git",
+      "Stakeholder Management"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 23,
+    "title": "Insights Analyst",
+    "company": "Orion Health",
+    "location": "Amsterdam",
+    "mode": "On-site",
+    "level": "Junior",
+    "snippet": "Support experimentation and A/B testing to optimize products.",
+    "description": "You will build and maintain batch and streaming data pipelines, ensure data quality, and deliver analytics-ready datasets. You will work with cloud platforms and modern version control practices.",
+    "tags": [
+      "Communication",
+      "Python",
+      "Tableau",
+      "Statistics",
+      "Looker",
+      "Excel"
+    ],
+    "remote_friendly": false
+  },
+  {
+    "id": 24,
+    "title": "Pricing Analyst",
     "company": "Flow Logistics",
+    "location": "Madrid",
+    "mode": "Remote",
+    "level": "Junior",
+    "snippet": "Monitor performance, detect anomalies, and drive continuous improvement.",
+    "description": "This role focuses on continuous improvement: measuring performance, diagnosing issues, proposing actions, and tracking impact. You will work directly with stakeholders to align on objectives.",
+    "tags": [
+      "Git",
+      "Pricing",
+      "Marketing Analytics",
+      "Communication",
+      "Demand Forecasting"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 25,
+    "title": "Data Governance Analyst",
+    "company": "Flow Logistics",
+    "location": "Zurich",
+    "mode": "Hybrid",
+    "level": "Junior",
+    "snippet": "Work with data to support faster and better decision-making.",
+    "description": "You will own problems end-to-end: gather requirements, prepare and analyze data, and present evidence-based recommendations. You will collaborate closely with product, business, and engineering teams.",
+    "tags": [
+      "Excel",
+      "HIPAA/GDPR",
+      "EHR",
+      "Git",
+      "Communication",
+      "Clinical Analytics"
+    ],
+    "remote_friendly": false
+  },
+  {
+    "id": 26,
+    "title": "Data Engineer",
+    "company": "Nimbus Analytics",
+    "location": "Barcelona",
+    "mode": "On-site",
+    "level": "Senior",
+    "snippet": "Transform metrics and system logs into actionable insights for teams.",
+    "description": "You will be responsible for maintaining clean and reliable datasets, defining KPIs, automating reports, and supporting data-driven decision-making. Strong communication skills and attention to detail are essential.",
+    "tags": [
+      "Airflow",
+      "Kafka",
+      "Statistics",
+      "Communication",
+      "AWS"
+    ],
+    "remote_friendly": false
+  },
+  {
+    "id": 27,
+    "title": "Product Data Scientist",
+    "company": "Sierra Insurance",
+    "location": "Madrid",
+    "mode": "On-site",
+    "level": "Senior",
+    "snippet": "Design dashboards and automate reporting for key stakeholders.",
+    "description": "You will build and maintain batch and streaming data pipelines, ensure data quality, and deliver analytics-ready datasets. You will work with cloud platforms and modern version control practices.",
+    "tags": [
+      "Mixpanel",
+      "KPIs",
+      "Amplitude",
+      "Communication",
+      "Product Strategy"
+    ],
+    "remote_friendly": false
+  },
+  {
+    "id": 28,
+    "title": "Applied Scientist",
+    "company": "Lumen FinTech",
+    "location": "Barcelona",
+    "mode": "Hybrid",
+    "level": "Mid-level",
+    "snippet": "Build, clean, validate, and publish datasets for analytics and modeling.",
+    "description": "This role focuses on continuous improvement: measuring performance, diagnosing issues, proposing actions, and tracking impact. You will work directly with stakeholders to align on objectives.",
+    "tags": [
+      "Excel",
+      "TensorFlow",
+      "scikit-learn",
+      "PyTorch"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 29,
+    "title": "Detection Engineer",
+    "company": "Nova Consulting",
+    "location": "Braga",
+    "mode": "Hybrid",
+    "level": "Senior",
+    "snippet": "Support experimentation and A/B testing to optimize products.",
+    "description": "You will own problems end-to-end: gather requirements, prepare and analyze data, and present evidence-based recommendations. You will collaborate closely with product, business, and engineering teams.",
+    "tags": [
+      "Threat Modeling",
+      "Python",
+      "Stakeholder Management",
+      "Git",
+      "Splunk"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 30,
+    "title": "Computer Vision Engineer",
+    "company": "Marlin Bioinformatics",
+    "location": "Madrid",
+    "mode": "Remote",
+    "level": "Mid-level",
+    "snippet": "Monitor performance, detect anomalies, and drive continuous improvement.",
+    "description": "You will be responsible for maintaining clean and reliable datasets, defining KPIs, automating reports, and supporting data-driven decision-making. Strong communication skills and attention to detail are essential.",
+    "tags": [
+      "Excel",
+      "Python",
+      "Communication",
+      "Stakeholder Management",
+      "Git",
+      "Statistics"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 31,
+    "title": "Capacity Planning Analyst",
+    "company": "Nimbus Analytics",
+    "location": "Coimbra",
+    "mode": "Hybrid",
+    "level": "Lead",
+    "snippet": "Work with data to support faster and better decision-making.",
+    "description": "You will build and maintain batch and streaming data pipelines, ensure data quality, and deliver analytics-ready datasets. You will work with cloud platforms and modern version control practices.",
+    "tags": [
+      "Excel",
+      "Statistics",
+      "Python",
+      "Stakeholder Management",
+      "Git",
+      "SQL"
+    ],
+    "remote_friendly": false
+  },
+  {
+    "id": 32,
+    "title": "Health Data Scientist",
+    "company": "Quanta Robotics",
+    "location": "Dublin",
+    "mode": "Remote",
+    "level": "Senior",
+    "snippet": "Transform metrics and system logs into actionable insights for teams.",
+    "description": "This role focuses on continuous improvement: measuring performance, diagnosing issues, proposing actions, and tracking impact. You will work directly with stakeholders to align on objectives.",
+    "tags": [
+      "Stakeholder Management",
+      "Clinical Analytics",
+      "HIPAA/GDPR",
+      "Excel",
+      "EHR"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 33,
+    "title": "Telecom BI Analyst",
+    "company": "Quanta Robotics",
+    "location": "Milan",
+    "mode": "Hybrid",
+    "level": "Junior",
+    "snippet": "Design dashboards and automate reporting for key stakeholders.",
+    "description": "You will own problems end-to-end: gather requirements, prepare and analyze data, and present evidence-based recommendations. You will collaborate closely with product, business, and engineering teams.",
+    "tags": [
+      "Dashboards",
+      "Python",
+      "Excel",
+      "Time Series",
+      "Communication",
+      "SQL"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 34,
+    "title": "Risk Analyst",
+    "company": "Saffron Foods",
+    "location": "Amsterdam",
+    "mode": "Hybrid",
+    "level": "Entry-level",
+    "snippet": "Build, clean, validate, and publish datasets for analytics and modeling.",
+    "description": "You will be responsible for maintaining clean and reliable datasets, defining KPIs, automating reports, and supporting data-driven decision-making. Strong communication skills and attention to detail are essential.",
+    "tags": [
+      "Statistics",
+      "RegTech",
+      "Excel",
+      "Communication",
+      "Stakeholder Management",
+      "Risk"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 35,
+    "title": "People Analyst",
+    "company": "Marlin Bioinformatics",
+    "location": "Faro",
+    "mode": "Remote",
+    "level": "Entry-level",
+    "snippet": "Support experimentation and A/B testing to optimize products.",
+    "description": "You will build and maintain batch and streaming data pipelines, ensure data quality, and deliver analytics-ready datasets. You will work with cloud platforms and modern version control practices.",
+    "tags": [
+      "Communication",
+      "People Analytics",
+      "Surveys",
+      "Git"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 36,
+    "title": "Analytics Engineer",
+    "company": "Nimbus Analytics",
+    "location": "Dublin",
+    "mode": "On-site",
+    "level": "Entry-level",
+    "snippet": "Monitor performance, detect anomalies, and drive continuous improvement.",
+    "description": "This role focuses on continuous improvement: measuring performance, diagnosing issues, proposing actions, and tracking impact. You will work directly with stakeholders to align on objectives.",
+    "tags": [
+      "Looker",
+      "Excel",
+      "Git",
+      "Tableau",
+      "Stakeholder Management"
+    ],
+    "remote_friendly": false
+  },
+  {
+    "id": 37,
+    "title": "Health Data Scientist",
+    "company": "Quanta Robotics",
     "location": "Porto",
     "mode": "On-site",
-    "level": "Junior / Mid-level",
-    "snippet": "Improve operational workflows and analyze process performance.",
-    "description": "Support operations teams by analyzing KPIs, optimizing workflows, and suggesting improvements.",
-    "tags": ["Excel", "Operations", "Logistics", "Reporting"],
+    "level": "Lead",
+    "snippet": "Work with data to support faster and better decision-making.",
+    "description": "You will own problems end-to-end: gather requirements, prepare and analyze data, and present evidence-based recommendations. You will collaborate closely with product, business, and engineering teams.",
+    "tags": [
+      "Stakeholder Management",
+      "HIPAA/GDPR",
+      "Python",
+      "Communication"
+    ],
     "remote_friendly": false
+  },
+  {
+    "id": 38,
+    "title": "Compliance Data Analyst",
+    "company": "Orion Health",
+    "location": "Berlin",
+    "mode": "Remote",
+    "level": "Intern",
+    "snippet": "Transform metrics and system logs into actionable insights for teams.",
+    "description": "You will be responsible for maintaining clean and reliable datasets, defining KPIs, automating reports, and supporting data-driven decision-making. Strong communication skills and attention to detail are essential.",
+    "tags": [
+      "SQL",
+      "Python",
+      "Excel",
+      "Risk",
+      "Communication",
+      "Fraud Analytics"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 39,
+    "title": "Insights Analyst",
+    "company": "Cobalt Security",
+    "location": "London",
+    "mode": "Hybrid",
+    "level": "Mid-level",
+    "snippet": "Design dashboards and automate reporting for key stakeholders.",
+    "description": "You will build and maintain batch and streaming data pipelines, ensure data quality, and deliver analytics-ready datasets. You will work with cloud platforms and modern version control practices.",
+    "tags": [
+      "Tableau",
+      "SQL",
+      "Looker",
+      "Power BI",
+      "Stakeholder Management"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 40,
+    "title": "Game Data Scientist",
+    "company": "Atlas Systems",
+    "location": "Stockholm",
+    "mode": "Remote",
+    "level": "Lead",
+    "snippet": "Build, clean, validate, and publish datasets for analytics and modeling.",
+    "description": "This role focuses on continuous improvement: measuring performance, diagnosing issues, proposing actions, and tracking impact. You will work directly with stakeholders to align on objectives.",
+    "tags": [
+      "Git",
+      "SQL",
+      "Player Analytics",
+      "Excel",
+      "Funnel Analysis"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 41,
+    "title": "KYC Analyst",
+    "company": "Zephyr Mobility",
+    "location": "Warsaw",
+    "mode": "Hybrid",
+    "level": "Entry-level",
+    "snippet": "Support experimentation and A/B testing to optimize products.",
+    "description": "You will own problems end-to-end: gather requirements, prepare and analyze data, and present evidence-based recommendations. You will collaborate closely with product, business, and engineering teams.",
+    "tags": [
+      "Audit",
+      "Reporting",
+      "Excel",
+      "Communication",
+      "AML"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 42,
+    "title": "Reporting Specialist",
+    "company": "Helix Labs",
+    "location": "Remote (Worldwide)",
+    "mode": "On-site",
+    "level": "Intern",
+    "snippet": "Monitor performance, detect anomalies, and drive continuous improvement.",
+    "description": "You will be responsible for maintaining clean and reliable datasets, defining KPIs, automating reports, and supporting data-driven decision-making. Strong communication skills and attention to detail are essential.",
+    "tags": [
+      "Power BI",
+      "Excel",
+      "SQL",
+      "Looker",
+      "Python"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 43,
+    "title": "Bioinformatics Analyst",
+    "company": "Kite AI",
+    "location": "Remote (EU)",
+    "mode": "On-site",
+    "level": "Entry-level",
+    "snippet": "Work with data to support faster and better decision-making.",
+    "description": "You will build and maintain batch and streaming data pipelines, ensure data quality, and deliver analytics-ready datasets. You will work with cloud platforms and modern version control practices.",
+    "tags": [
+      "Excel",
+      "Clinical Analytics",
+      "HIPAA/GDPR",
+      "Stakeholder Management",
+      "Communication",
+      "Data Privacy"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 44,
+    "title": "Growth Analyst",
+    "company": "Nimbus Analytics",
+    "location": "Warsaw",
+    "mode": "Remote",
+    "level": "Entry-level",
+    "snippet": "Transform metrics and system logs into actionable insights for teams.",
+    "description": "This role focuses on continuous improvement: measuring performance, diagnosing issues, proposing actions, and tracking impact. You will work directly with stakeholders to align on objectives.",
+    "tags": [
+      "Excel",
+      "Mixpanel",
+      "KPIs",
+      "Stakeholder Management"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 45,
+    "title": "Health Data Scientist",
+    "company": "Orion Health",
+    "location": "London",
+    "mode": "On-site",
+    "level": "Entry-level",
+    "snippet": "Design dashboards and automate reporting for key stakeholders.",
+    "description": "You will own problems end-to-end: gather requirements, prepare and analyze data, and present evidence-based recommendations. You will collaborate closely with product, business, and engineering teams.",
+    "tags": [
+      "Python",
+      "Communication",
+      "Stakeholder Management",
+      "HIPAA/GDPR",
+      "Excel"
+    ],
+    "remote_friendly": false
+  },
+  {
+    "id": 46,
+    "title": "Bioinformatics Analyst",
+    "company": "Atlas Systems",
+    "location": "Remote (EU)",
+    "mode": "Remote",
+    "level": "Intern",
+    "snippet": "Build, clean, validate, and publish datasets for analytics and modeling.",
+    "description": "You will be responsible for maintaining clean and reliable datasets, defining KPIs, automating reports, and supporting data-driven decision-making. Strong communication skills and attention to detail are essential.",
+    "tags": [
+      "Stakeholder Management",
+      "Data Privacy",
+      "Git",
+      "Python",
+      "EHR"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 47,
+    "title": "Growth Analyst",
+    "company": "Lumen FinTech",
+    "location": "Braga",
+    "mode": "Hybrid",
+    "level": "Senior",
+    "snippet": "Support experimentation and A/B testing to optimize products.",
+    "description": "You will build and maintain batch and streaming data pipelines, ensure data quality, and deliver analytics-ready datasets. You will work with cloud platforms and modern version control practices.",
+    "tags": [
+      "KPIs",
+      "A/B Testing",
+      "Amplitude",
+      "Stakeholder Management",
+      "Statistics",
+      "Mixpanel"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 48,
+    "title": "ML Engineer",
+    "company": "Flow Logistics",
+    "location": "Setúbal",
+    "mode": "Hybrid",
+    "level": "Mid-level",
+    "snippet": "Monitor performance, detect anomalies, and drive continuous improvement.",
+    "description": "This role focuses on continuous improvement: measuring performance, diagnosing issues, proposing actions, and tracking impact. You will work directly with stakeholders to align on objectives.",
+    "tags": [
+      "Stakeholder Management",
+      "PyTorch",
+      "Python",
+      "Communication"
+    ],
+    "remote_friendly": true
+  },
+  {
+    "id": 49,
+    "title": "Analytics Consultant",
+    "company": "Nimbus Analytics",
+    "location": "Barcelona",
+    "mode": "Hybrid",
+    "level": "Entry-level",
+    "snippet": "Work with data to support faster and better decision-making.",
+    "description": "You will own problems end-to-end: gather requirements, prepare and analyze data, and present evidence-based recommendations. You will collaborate closely with product, business, and engineering teams.",
+    "tags": [
+      "Stakeholder Management",
+      "Power BI",
+      "SQL",
+      "Client Reporting",
+      "Storytelling",
+      "Communication"
+    ],
+    "remote_friendly": false
+  },
+  {
+    "id": 50,
+    "title": "Process Analytics Engineer",
+    "company": "Atlas Systems",
+    "location": "Madrid",
+    "mode": "Remote",
+    "level": "Entry-level",
+    "snippet": "Transform metrics and system logs into actionable insights for teams.",
+    "description": "You will be responsible for maintaining clean and reliable datasets, defining KPIs, automating reports, and supporting data-driven decision-making. Strong communication skills and attention to detail are essential.",
+    "tags": [
+      "Communication",
+      "IoT",
+      "Stakeholder Management",
+      "Git",
+      "Python",
+      "Statistics"
+    ],
+    "remote_friendly": true
   }
 ]

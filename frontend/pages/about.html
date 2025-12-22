@@ -1,8 +1,48 @@
 {% extends "base.html" %}
-{% block title %}About · LLM App{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/about.css') }}">
+{% endblock %}
+
 {% block content %}
-  <div class="card">
-    <h2>About</h2>
-    <p class="muted">Capstone project built with FastAPI, Jinja, and HTMX. This UI is a lightweight shell you can extend once your team defines the scope.</p>
+<section class="about-page">
+  <div class="card about-card">
+    <h2>About Talentum</h2>
+    <p class="muted">
+      Talentum is an AI-powered career mentor built to help students and early-career professionals improve their CVs,
+      prepare for interviews, and make smarter career decisions.
+    </p>
+
+    <div class="about-grid">
+      <div class="about-item">
+        <h3>What it does</h3>
+        <ul>
+          <li>CV feedback with clear, actionable improvements</li>
+          <li>Career guidance and next-step planning</li>
+          <li>Writing help (LinkedIn, outreach messages, cover letters)</li>
+        </ul>
+      </div>
+
+      <div class="about-item">
+        <h3>How it works</h3>
+        <p class="muted">
+          Built as a capstone project using FastAPI for the backend and Jinja/HTMX for a fast, lightweight UI.
+          The goal is simple: reduce career stress and increase your chances of landing a role you actually want.
+        </p>
+      </div>
+
+      <div class="about-item">
+        <h3>Privacy</h3>
+        <p class="muted">
+          Your data stays tied to your account. If you use Guest Mode, your chat won’t be saved.
+          Uploads and personal details are only used to generate your results.
+        </p>
+      </div>
+    </div>
+
+    <div class="about-cta">
+      <a class="btn primary" href="/chat">Try the chatbot</a>
+      <a class="btn secondary" href="/cv">Analyze my CV</a>
+    </div>
   </div>
+</section>
 {% endblock %}

@@ -1,3 +1,4 @@
 Abrir cmd na pasta Project
 venv\Scripts\activate
-uvicorn backend.app:app --reload
+uvicorn backend.app:app --reload --host 0.0.0.0 --port 8000
+database password: nb3CX9KXVdmxG9sZ
