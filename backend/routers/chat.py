@@ -1,17 +1,15 @@
 from fastapi import APIRouter, Request, Depends, Form
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from langfuse import observe, get_client
+
 from backend.database import get_db
 from backend.routers.auth import get_current_user
 from backend.models.chat_model import ChatMessage, JobApplication
+from backend.services.ai.chatbot_service import orch
 from backend.models.cv_model import CV
-from backend.services.ai.chatbot_service import (
-    get_chatbot_response,
-    generate_cover_letter_content,
-    generate_linkedin_summary_content
-)
+
 from datetime import datetime, timedelta
 import os
 
@@ -31,6 +29,7 @@ def safe_langfuse_client():
 # ========== Send Message ==========
 def chat_session_id(user_id: int) -> str:
     return f"talentum_chat_user_{user_id}"
+
 
 @router.post("/message", response_class=JSONResponse)
 @observe()
@@ -59,13 +58,12 @@ async def send_message(
     db.add(user_msg)
     db.commit()
 
-    # History
+    # History (you can keep this if you still use it elsewhere;
+    # the NEW SDK chat is stateful in memory, not DB.
     history = db.query(ChatMessage)\
         .filter(ChatMessage.user_id == user.id)\
         .order_by(ChatMessage.created_at.asc())\
         .all()
-
-    chat_history = [{"role": m.role, "content": m.content} for m in history[:-1]]
 
     # CV context
     latest_cv = db.query(CV).filter(
@@ -102,19 +100,20 @@ async def send_message(
         }
     }
 
-    # Nested trace: LLM call
-    ai_result = await get_chatbot_response(
+    # --- NEW: Orchestrator call (router -> agent) ---
+    ai_result = await orch.handle(
         user_id=user.id,
         user_message=message,
         user_cv_text=cv_text,
         user_context=user_context
     )
 
-    if ai_result["response"] and "overloaded" in ai_result["response"].lower():
+    if ai_result.get("response") and "overloaded" in ai_result["response"].lower():
         return JSONResponse({"response": ai_result["response"]}, status_code=503)
 
-    # Tool call path (nested trace inside handle_function_call)
-    if ai_result["function_call"]:
+    # Tool call path
+    if ai_result.get("function_call"):
+        # Execute tool
         tool_payload = await handle_function_call(
             ai_result["function_call"],
             user.id,
@@ -122,10 +121,13 @@ async def send_message(
             cv_text
         )
 
-        # second nested LLM call using tool result
-        final = await get_chatbot_response(
+        # IMPORTANT: Continue with SAME AGENT session that asked for the tool
+        agent_name = ai_result.get("agent_name") or "general"
+
+        # second LLM call using tool result (function_response turn)
+        final = await orch.handle(
             user_id=user.id,
-            user_message=message,
+            user_message="",
             user_cv_text=cv_text,
             user_context=user_context,
             tool_result={
@@ -134,27 +136,41 @@ async def send_message(
                     "message": tool_payload["message"],
                     "data": tool_payload.get("data")
                 }
-            }
+            },
         )
 
-        final_text = final["response"] or tool_payload["message"]
+        final_text = final.get("response") or tool_payload["message"]
 
         assistant_msg = ChatMessage(
             user_id=user.id,
             role="assistant",
             content=final_text,
-            function_call=ai_result["function_call"]
+            function_call=ai_result["function_call"],
+            agent_name=agent_name
         )
         db.add(assistant_msg)
         db.commit()
 
-        return JSONResponse({"response": final_text, "function_used": ai_result["tool_name"]})
+        return JSONResponse({
+            "response": final_text,
+            "function_used": ai_result.get("tool_name"),
+            "agent": agent_name
+        })
 
-    assistant_msg = ChatMessage(user_id=user.id, role="assistant", content=ai_result["response"])
+    # Normal response path
+    assistant_msg = ChatMessage(
+        user_id=user.id,
+        role="assistant",
+        content=ai_result.get("response"),
+        agent_name=ai_result.get("agent_name")  # <-- add this column OR remove this line
+    )
     db.add(assistant_msg)
     db.commit()
 
-    return JSONResponse({"response": ai_result["response"]})
+    return JSONResponse({
+        "response": ai_result.get("response"),
+        "agent": ai_result.get("agent_name")
+    })
 
 # ========== Handle Function Calls ==========
 @observe()

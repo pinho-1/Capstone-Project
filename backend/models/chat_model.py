@@ -12,6 +12,7 @@ class ChatMessage(Base):
     role = Column(String, nullable=False)  # user | assistant
     content = Column(Text, nullable=False)
     function_call = Column(JSON, nullable=True)
+    agent_name = Column(String(32), nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
