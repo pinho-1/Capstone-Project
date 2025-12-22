@@ -205,7 +205,7 @@ Typical flows include:
 ---
 
 ## Deployment
-The application can be deployed on any platform that supports Python ASGI applications.
+The application was deployed on React on the following link: https://capstone-project-e3wv.onrender.com
 
 ---
 
