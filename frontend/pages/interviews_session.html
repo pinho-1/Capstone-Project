@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/interviews_session.css') }}?v=2">
+{% endblock %}
+
+{% block content %}
+<div class="interview-container">
+  <h1 class="interview-title">Mock Interviews</h1>
+
+  <p class="interview-subtitle">
+    {{ question_count }} questions for {{ role }}
+    ({{ seniority|capitalize }} · {{ 'English' if language == 'en' else 'Português' }}).
+  </p>
+
+  <section class="interview-card">
+    <div class="text-status-row">
+      <span class="text-status-dot" id="text-status-dot"></span>
+      <span id="interview-status">Preparing your interview…</span>
+    </div>
+
+    <div class="session-actions">
+      <button class="primary-btn" id="start-text-btn" type="button" disabled>
+        {{ 'Start session' if language == 'en' else 'Iniciar sessão' }}
+      </button>
+
+      <button class="secondary-btn" id="reset-btn" type="button" disabled>
+        {{ 'Reset' if language == 'en' else 'Reiniciar' }}
+      </button>
+    </div>
+
+    <div class="chat-panel" id="chat-panel">
+      <div class="chat-messages" id="chat-messages"></div>
+
+      <div class="typing-row" id="typing-row" hidden>
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+      </div>
+
+      <form id="chat-form" class="chat-form" autocomplete="off">
+        <input
+          id="chat-input"
+          type="text"
+          placeholder="{{ 'Type your answer…' if language == 'en' else 'Escreve a tua resposta…' }}"
+          disabled
+        />
+        <button id="send-btn" type="submit" class="primary-btn" disabled>
+          {{ 'Send' if language == 'en' else 'Enviar' }}
+        </button>
+      </form>
+
+      <!-- ✅ RESULTS PANEL (hidden until done) -->
+      <div class="results-panel" id="results-panel" hidden>
+        <div class="results-card">
+          <div class="results-emoji" id="results-emoji">🎯</div>
+
+          <div class="results-title" id="results-title">
+            {{ 'Interview Results' if language == 'en' else 'Resultado da Entrevista' }}
+          </div>
+
+          <div class="results-score">
+            <span class="results-score-num" id="results-score-num">0</span>
+            <span class="results-score-den">/100</span>
+          </div>
+
+          <div class="results-sub" id="results-sub">
+            {{ "Here's what to improve next time." if language == 'en' else 'Aqui vai o que podes melhorar para a próxima.' }}
+          </div>
+
+          <ul class="results-feedback" id="results-feedback"></ul>
+
+          <div class="results-actions">
+            <button type="button" class="secondary-btn" id="results-restart-btn">
+              {{ 'Restart' if language == 'en' else 'Reiniciar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- /RESULTS PANEL -->
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  window.INTERVIEW_CONFIG = {
+    role: "{{ role }}",
+    seniority: "{{ seniority }}",
+    language: "{{ language }}",
+    questionCount: {{ question_count }},
+    sessionId: "{{ session_id }}"
+  };
+</script>
+<script src="{{ url_for('static', path='/js/interviews_session.js') }}?v=2"></script>
+{% endblock %}

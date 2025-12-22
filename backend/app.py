@@ -10,6 +10,8 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
+from backend.routers.interviews_api import router as interviews_api_router
+import uuid
 
 from backend.database import Base, engine, get_db
 from backend.models.cv_model import CV
@@ -41,6 +43,7 @@ templates = Jinja2Templates(directory=os.path.join(FRONTEND_DIR, "pages"))
 # Routers
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(cv.router, prefix="/cv", tags=["cv"])
+app.include_router(interviews_api_router)
 app.include_router(cm.router)
 app.include_router(chat.router, prefix="/chat", tags=["chat"])
 
@@ -324,16 +327,49 @@ def load_mock_jobs():
 
 
 @app.get("/interviews", response_class=HTMLResponse)
-def interviews_page(request: Request, db: Session = Depends(get_db)):
+def interviews_setup_page(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
     if not user:
         return RedirectResponse("/auth?error=login_required", status_code=303)
 
     return templates.TemplateResponse(
-        "interviews.html",
-        {"request": request, "user": user, "current_path": request.url.path},
+        "interviews_setup.html",      # new template name
+        {
+            "request": request,
+            "user": user,
+            "current_path": request.url.path,
+        },
     )
 
+@app.post("/interviews/session", response_class=HTMLResponse)
+async def interviews_session_page(
+    request: Request,
+    db: Session = Depends(get_db),
+    job_role: str = Form(...),
+    seniority: str = Form(...),
+    language: str = Form(...),
+    question_count: int = Form(...),
+):
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse("/auth?error=login_required", status_code=303)
+
+    # ✅ CREATE SESSION ID HERE
+    session_id = str(uuid.uuid4())
+
+    return templates.TemplateResponse(
+        "interviews_session.html",
+        {
+            "request": request,
+            "user": user,
+            "current_path": request.url.path,
+            "role": job_role,
+            "seniority": seniority,
+            "language": language,
+            "question_count": question_count,
+            "session_id": session_id,  # ✅ PASS TO TEMPLATE
+        },
+    )
 
 app.add_middleware(
     SessionMiddleware,
