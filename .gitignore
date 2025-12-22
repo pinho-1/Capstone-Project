@@ -9,3 +9,4 @@ __pycache__/
 
 # Arquivos sensíveis
 *.db
+.env

@@ -1,10 +1,12 @@
 from fastapi import FastAPI, Request, Depends, Form, Query
+from backend.database import Base, engine
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from backend.database import Base, engine, get_db
 from backend.models.user_model import User
 from backend.models.cv_model import CV 
+from backend.models.chat_model import ChatMessage, JobApplication
 from typing import Optional, Any
 from backend.routers import auth, cv, cm, chat
 from backend.routers.auth import get_current_user
@@ -37,6 +39,8 @@ app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(cv.router, prefix="/cv", tags=["cv"])
 app.include_router(cm.router)
 app.include_router(chat.router, prefix="/chat", tags=["chat"])
+
+Base.metadata.create_all(bind=engine)
 
 # Get Path
 def get_current_path(request: Request):
