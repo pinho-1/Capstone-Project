@@ -1,5 +1,3 @@
-# backend/services/cm_scoring.py
-
 from __future__ import annotations
 
 def clamp_int(x, lo: int, hi: int, default: int) -> int:

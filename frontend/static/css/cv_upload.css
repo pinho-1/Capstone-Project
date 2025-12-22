@@ -132,7 +132,7 @@
   color: #64748b;
 }
 
-/* HERO container, mantém o fundo global intacto */
+/* HERO container */
 .hero {
   position: relative;
   text-align: center;
@@ -140,7 +140,6 @@
   isolation: isolate;
 }
 
-/* microtag pequeno acima do título */
 .microtag {
   display: inline-block;
   padding: 0.28rem 0.6rem;
@@ -156,7 +155,6 @@
   transform: translateY(8px);
 }
 
-/* título com leve gradiente no texto */
 .hero-title {
   font-size: clamp(2.2rem, 3.6vw + 1rem, 3.2rem);
   line-height: 1.18;
@@ -180,7 +178,6 @@
   transform: translateY(10px);
 }
 
-/* divisor fininho para fechar o bloco do hero */
 .hero-divider {
   display: block;
   width: 220px;
@@ -191,13 +188,11 @@
   transform: translateY(6px);
 }
 
-/* estados visíveis aplicados via JS */
 .hero .show {
   opacity: 1 !important;
   transform: translateY(0) !important;
 }
 
-/* transições suaves e um toque de nitidez no título */
 .microtag,
 .hero-title,
 .hero-tagline,
@@ -205,12 +200,10 @@
   transition: opacity 700ms ease, transform 700ms ease, letter-spacing 700ms ease;
 }
 
-/* pequeno truque de letter spacing no título na hora que aparece */
 .hero-title.show {
   letter-spacing: 0em;
 }
 
-/* === SIDE PANELS === */
 /* === SIDE PANELS === */
 .side-panel {
   position: relative;
@@ -417,7 +410,6 @@
   40% { opacity: 1; transform: translateY(-2px); }
 }
 
-/* Optional: background wrapper if you want it centered */
 #upload-feedback {
   text-align: center;
   margin-top: 1.5rem;

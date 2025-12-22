@@ -1,12 +1,12 @@
-import os
 import io
+import os
 import re
+
 from docx import Document
 from PyPDF2 import PdfReader
 from markupsafe import escape
 
 
-# --- Extract text from uploaded CV file ---
 def extract_text_from_file(content_bytes: bytes, filename: str) -> str:
     ext = os.path.splitext(filename)[1].lower().strip()
 
@@ -14,12 +14,15 @@ def extract_text_from_file(content_bytes: bytes, filename: str) -> str:
         reader = PdfReader(io.BytesIO(content_bytes))
         text = "\n".join(page.extract_text() or "" for page in reader.pages)
 
-    elif ext in (".docx", ".doc"):
+    elif ext == ".docx":
         doc = Document(io.BytesIO(content_bytes))
         text = "\n".join(p.text for p in doc.paragraphs)
 
     elif ext == ".txt":
         text = content_bytes.decode("utf-8", errors="ignore")
+
+    elif ext == ".doc":
+        raise ValueError("Unsupported file type '.doc'. Please upload .docx instead.")
 
     else:
         raise ValueError(f"Unsupported file type: '{ext}' — upload .pdf, .docx, or .txt.")
@@ -27,8 +30,6 @@ def extract_text_from_file(content_bytes: bytes, filename: str) -> str:
     text = re.sub(r"\n\s*\n", "\n\n", text.strip())
     return text
 
-
-# ========== CARD BUILDING HELPERS ==========
 
 def route_intent(intent: str) -> str:
     t = (intent or "").lower()

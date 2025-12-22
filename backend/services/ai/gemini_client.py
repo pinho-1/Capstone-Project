@@ -3,6 +3,7 @@ import json
 from typing import Any, Optional, Dict, List
 from google import genai
 from google.genai import types
+from langfuse import observe
 
 API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
@@ -18,6 +19,7 @@ def get_client():
 def get_types():
     return types
 
+@observe()
 def make_chat(
     system_prompt: str,
     function_declarations: Optional[List[dict]] = None,
@@ -39,7 +41,7 @@ def make_chat(
 
     return client.chats.create(model=model, config=config)
 
-
+@observe()
 def generate_text(
     system_prompt: str,
     user_text: str,
@@ -53,7 +55,7 @@ def generate_text(
     resp = client.models.generate_content(model=model, contents=user_text, config=config)
     return resp.text
 
-
+@observe()
 async def generate_json(
     system_prompt: str,
     user_payload: dict,

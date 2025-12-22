@@ -1,30 +1,42 @@
-from fastapi import (
-    APIRouter, Request, Depends, UploadFile, File, Form, BackgroundTasks, Query
-)
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
-from sqlalchemy.orm import Session
-from backend.database import get_db, SessionLocal
-from backend.routers.auth import get_current_user
-from backend.models.cv_model import CV
-from fastapi.templating import Jinja2Templates
-from markupsafe import Markup, escape
-import re
 import asyncio
 import os
+import re
 import uuid
+from datetime import datetime
 
-# AI + CV helpers
-from backend.services.ai.cv_agent import (score_cv_with_ai, build_card_from_intent, generate_example,
-                             generate_center_insights, classify_document_is_cv)
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, Query, Request, UploadFile
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
+from langfuse import observe, get_client
+from markupsafe import Markup, escape
+from sqlalchemy.orm import Session
+
+from backend.database import get_db, SessionLocal
+from backend.models.cv_model import CV
+from backend.routers.auth import get_current_user
+from backend.services.ai.cv_agent import (
+    build_card_from_intent,
+    classify_document_is_cv,
+    generate_center_insights,
+    generate_example,
+    score_cv_with_ai,
+)
 from backend.services.cv_utils import extract_text_from_file, route_intent
 
 router = APIRouter()
 
 FRONTEND_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "../frontend/pages"
+    "../frontend/pages",
 )
 templates = Jinja2Templates(directory=FRONTEND_DIR)
+
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
+
+
+# -----------------------------
+# Template filter
+# -----------------------------
 
 def emphasize(text: str, highlights: list[str]):
     if not text or not highlights:
@@ -35,7 +47,7 @@ def emphasize(text: str, highlights: list[str]):
     phrases = sorted(
         {p.strip() for p in highlights if isinstance(p, str) and p.strip()},
         key=len,
-        reverse=True
+        reverse=True,
     )
 
     result = raw
@@ -59,20 +71,39 @@ def emphasize(text: str, highlights: list[str]):
 
     result = result.replace("<strong class='kw'>", "%%KW_OPEN%%").replace("</strong>", "%%KW_CLOSE%%")
     result = escape(result)
-    result = (str(result)
-              .replace("%%KW_OPEN%%", "<strong class='kw'>")
-              .replace("%%KW_CLOSE%%", "</strong>"))
+    result = (
+        str(result)
+        .replace("%%KW_OPEN%%", "<strong class='kw'>")
+        .replace("%%KW_CLOSE%%", "</strong>")
+    )
 
     return Markup(result)
 
+
 templates.env.filters["emphasize"] = emphasize
 
-MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
 
-# ========== 0. VIEW DASHBOARD ==========
+# -----------------------------
+# Langfuse helper
+# -----------------------------
+
+def safe_langfuse_client():
+    if os.getenv("LANGFUSE_PUBLIC_KEY") and os.getenv("LANGFUSE_SECRET_KEY"):
+        return get_client()
+    return None
+
+
+def cv_trace_session_id(user_id: int, cv_id: str) -> str:
+    return f"talentum_cv_{user_id}_{cv_id}"
+
+
+# -----------------------------
+# 0) View dashboard
+# -----------------------------
+
 @router.get("/view/{cv_id}", response_class=HTMLResponse)
+@observe()
 async def view_cv(request: Request, cv_id: str, db: Session = Depends(get_db)):
-    """Displays the CV dashboard once analysis is ready."""
     user = get_current_user(request, db)
     if not user:
         return RedirectResponse("/auth?error=login_required", status_code=303)
@@ -81,46 +112,80 @@ async def view_cv(request: Request, cv_id: str, db: Session = Depends(get_db)):
     if not cv:
         return RedirectResponse("/cv/upload", status_code=303)
 
-    # 🧠 Save mentor context to session
+    request.session["active_cv_id"] = cv_id
+
     if cv.mentor_focus:
         request.session["mentor_focus"] = cv.mentor_focus
 
     request.session.pop("topic_cards", None)
 
+    langfuse = safe_langfuse_client()
+    if langfuse:
+        langfuse.update_current_trace(
+            session_id=cv_trace_session_id(user.id, cv_id),
+            tags=["cv", "dashboard"],
+            metadata={"endpoint": "/cv/view", "cv_id": cv_id},
+        )
+
     return templates.TemplateResponse(
         "cv_dashboard.html",
-        {"request": request, "cv": cv, "user": user, "current_path": request.url.path}
+        {"request": request, "cv": cv, "user": user, "current_path": request.url.path},
     )
 
-# ========== 1. UPLOAD & PROCESS ==========
+
+# -----------------------------
+# 1) Upload & process
+# -----------------------------
 
 @router.post("/upload")
+@observe()
 async def cv_upload(
     request: Request,
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    background_tasks: BackgroundTasks = None
 ):
     user = get_current_user(request, db)
     if not user:
         return RedirectResponse("/auth?error=login_required", status_code=303)
 
-    # Read the file immediately (before background task starts)
     content_bytes = await file.read()
 
-    # Create the DB entry
+    if len(content_bytes) > MAX_FILE_SIZE:
+        return RedirectResponse("/cv/upload?error=file_too_large", status_code=303)
+
+    # Create the DB entry up front
     cv_id = str(uuid.uuid4())
     cv_entry = CV(id=cv_id, user_id=user.id, status="processing")
     db.add(cv_entry)
     db.commit()
 
-    # Pass bytes instead of the file object
-    background_tasks.add_task(process_uploaded_cv, cv_id, file.filename, content_bytes)
+    request.session["active_cv_id"] = cv_id
+
+    langfuse = safe_langfuse_client()
+    if langfuse:
+        langfuse.update_current_trace(
+            session_id=cv_trace_session_id(user.id, cv_id),
+            tags=["cv", "upload", "processing"],
+            metadata={
+                "endpoint": "/cv/upload",
+                "cv_id": cv_id,
+                "filename": file.filename,
+                "bytes": len(content_bytes),
+            },
+        )
+
+    background_tasks.add_task(process_uploaded_cv, cv_id, user.id, file.filename, content_bytes)
 
     return RedirectResponse(f"/cv/view/{cv_id}", status_code=303)
 
-def process_uploaded_cv(cv_id: str, filename: str, content_bytes: bytes):
-    """Runs in background after upload."""
+
+# -----------------------------
+# Background processor
+# -----------------------------
+
+@observe()
+def process_uploaded_cv(cv_id: str, user_id: int, filename: str, content_bytes: bytes):
     db = SessionLocal()
 
     def normalize_signals(raw, default_tone="neutral", limit=6):
@@ -140,7 +205,6 @@ def process_uploaded_cv(cv_id: str, filename: str, content_bytes: bytes):
             if not label:
                 continue
 
-            # lock tones to your CSS classes
             if tone not in ("positive", "neutral", "warning"):
                 tone = default_tone
 
@@ -171,57 +235,62 @@ def process_uploaded_cv(cv_id: str, filename: str, content_bytes: bytes):
             "language": "N/A (not a CV). Upload a resume format to score language.",
         }
 
+    langfuse = safe_langfuse_client()
+    if langfuse:
+        langfuse.update_current_trace(
+            session_id=cv_trace_session_id(user_id, cv_id),
+            tags=["cv", "background", "ai"],
+            metadata={"cv_id": cv_id, "filename": filename},
+        )
+
     try:
         raw_text = extract_text_from_file(content_bytes, filename)
 
-        # 1) Classify: CV or NOT CV (no “maybe”)
-        ai_class = asyncio.run(classify_document_is_cv(raw_text))
-        is_cv = bool(ai_class.get("is_cv", True))  # default True if model misbehaves
-        cv_signals = normalize_signals(ai_class.get("signals", []), default_tone="neutral", limit=4)
+        async def run_ai_pipeline():
+            ai_class = await classify_document_is_cv(raw_text)
+            is_cv = bool(ai_class.get("is_cv", True))
+            cv_signals = normalize_signals(ai_class.get("signals", []), default_tone="neutral", limit=4)
 
-        # 2) Run scoring + mentor regardless (optional), but only APPLY scores if is_cv=True
-        async def run_ai():
             scores_task = asyncio.create_task(score_cv_with_ai(raw_text))
             mentor_task = asyncio.create_task(generate_center_insights(raw_text))
-            return await asyncio.gather(scores_task, mentor_task)
+            scores, mentor = await asyncio.gather(scores_task, mentor_task)
 
-        scores, mentor = asyncio.run(run_ai())
+            return is_cv, cv_signals, scores, mentor
+
+        is_cv, cv_signals, scores, mentor = asyncio.run(run_ai_pipeline())
 
         highlights = mentor.get("highlights", []) if isinstance(mentor, dict) else []
-        if not isinstance(highlights, list):
-            highlights = []
-        highlights = [h.strip() for h in highlights if isinstance(h, str) and h.strip()]
-        highlights = highlights[:8]
+        highlights = highlights if isinstance(highlights, list) else []
+        highlights = [h.strip() for h in highlights if isinstance(h, str) and h.strip()][:8]
 
         strengths = mentor.get("strengths", []) if isinstance(mentor, dict) else []
         improvements = mentor.get("improvements", []) if isinstance(mentor, dict) else []
         strengths = strengths[:5] if isinstance(strengths, list) else []
         improvements = improvements[:5] if isinstance(improvements, list) else []
+
         summary = mentor.get("summary", "") if isinstance(mentor, dict) else ""
         focus = mentor.get("recommended_focus", "") if isinstance(mentor, dict) else ""
+
         mentor_signals = normalize_signals(
             mentor.get("signals", []) if isinstance(mentor, dict) else [],
             default_tone="neutral",
-            limit=4
+            limit=4,
         )
         signals = normalize_signals(cv_signals + mentor_signals, default_tone="neutral", limit=6)
 
-        # 3) Persist
-        cv = db.query(CV).filter(CV.id == cv_id).first()
+        cv = db.query(CV).filter(CV.id == cv_id, CV.user_id == user_id).first()
         if not cv:
             return
 
         cv.raw_text = raw_text
         cv.status = "ready"
 
-        # store mentor content always (you want the middle panel to explain)
         cv.mentor_highlights = highlights
         cv.mentor_summary = summary
         cv.mentor_strengths = strengths
         cv.mentor_improvements = improvements
         cv.mentor_focus = focus
 
-        # ensure a strong “Not a CV” signal if needed
         if not is_cv:
             signals = [s for s in signals if s.get("label", "").lower() != "not a cv"]
             signals.insert(0, {"label": "Not a CV", "tone": "warning"})
@@ -239,35 +308,31 @@ def process_uploaded_cv(cv_id: str, filename: str, content_bytes: bytes):
             cv.language_score = int(scores.get("language", 60))
             cv.overall_score = int(scores.get("overall", 60))
             cv.reasons = scores.get("reasons")
-
         else:
             set_not_cv_state(cv)
-
-            # also override mentor copy to match the state (optional but recommended)
             cv.mentor_summary = (
                 "This upload does not look like a CV/resume. "
-                "Upload a resume format with clear sections like Experience, Education, and Skills."
+                "Upload a resume format with Experience, Education, and Skills."
             )
             cv.mentor_strengths = [
                 "Content contains relevant information and technical detail.",
-                "Clear effort to communicate work and outcomes."
+                "Clear effort to communicate work and outcomes.",
             ]
             cv.mentor_improvements = [
                 "Reformat into a CV structure (Experience, Education, Skills, Projects).",
                 "Use bullet points with measurable achievements instead of paragraphs.",
-                "Add or clearly surface contact info, links, and date ranges."
+                "Add or clearly surface contact info, links, and date ranges.",
             ]
             cv.mentor_focus = "Convert this into a CV format and re-upload to get a real score."
 
         db.commit()
-        print(f"✅ CV {cv_id} processed. is_cv={is_cv}")
 
     except Exception as e:
-        print("Background AI task failed:", repr(e))
         try:
-            cv = db.query(CV).filter(CV.id == cv_id).first()
+            cv = db.query(CV).filter(CV.id == cv_id, CV.user_id == user_id).first()
             if cv:
                 cv.status = "failed"
+                cv.score_note = f"Processing failed: {type(e).__name__}"
                 db.commit()
         except Exception:
             pass
@@ -275,9 +340,18 @@ def process_uploaded_cv(cv_id: str, filename: str, content_bytes: bytes):
         db.close()
 
 
+# -----------------------------
+# 1b) Status endpoint
+# -----------------------------
+
 @router.get("/status/{cv_id}")
-def cv_status(cv_id: str, db: Session = Depends(get_db)):
-    cv = db.query(CV).filter(CV.id == cv_id).first()
+@observe()
+def cv_status(request: Request, cv_id: str, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    if not user:
+        return {"status": "unauthorized"}
+
+    cv = db.query(CV).filter(CV.id == cv_id, CV.user_id == user.id).first()
     if not cv:
         return {"status": "not_found"}
 
@@ -292,18 +366,23 @@ def cv_status(cv_id: str, db: Session = Depends(get_db)):
             "overall": cv.overall_score,
         }
         payload["signals"] = cv.mentor_signals
+        payload["is_cv"] = getattr(cv, "is_cv", None)
 
-    elif cv.status == "failed":
-        payload["error"] = "CV processing failed. Please try another file."
+    if cv.status == "failed":
+        payload["error"] = cv.score_note or "CV processing failed. Please try another file."
 
     return payload
 
-# ========== 2. DYNAMIC MENTOR CARDS ==========
+
+# -----------------------------
+# 2) Dynamic mentor cards (session-scoped)
+# -----------------------------
 
 PROGRESS_KEY = "mentor_progress"
 HISTORY_KEY = "mentor_history"
 
-CARDS_STORE: dict[str, dict[str, dict]] = {}  # {sid: {card_id: card_dict}}
+CARDS_STORE: dict[str, dict[str, dict]] = {}
+
 
 def get_sid(request: Request) -> str:
     sid = request.session.get("sid")
@@ -312,33 +391,41 @@ def get_sid(request: Request) -> str:
         request.session["sid"] = sid
     return sid
 
+
 def get_cards(request: Request) -> dict[str, dict]:
     sid = get_sid(request)
     return CARDS_STORE.setdefault(sid, {})
 
+
 def get_progress(request: Request) -> dict:
     return request.session.get(PROGRESS_KEY, {"completed": [], "dismissed": [], "suggested": []})
+
 
 def set_progress(request: Request, progress: dict) -> None:
     request.session[PROGRESS_KEY] = progress
 
+
 def get_history(request: Request) -> dict:
-    return request.session.get(HISTORY_KEY, {})  # {playbook: [history_items...]}
+    return request.session.get(HISTORY_KEY, {})
+
 
 def set_history(request: Request, history: dict) -> None:
     request.session[HISTORY_KEY] = history
 
+
 def is_done(card: dict) -> bool:
     return "Marked as done" in str(card.get("subtitle", ""))
+
 
 def active_cards(cards: dict[str, dict]) -> list[dict]:
     return [c for c in cards.values() if c and not is_done(c)]
 
+
 def active_playbooks(cards: dict[str, dict]) -> set[str]:
     return {c.get("playbook") for c in active_cards(cards) if c.get("playbook")}
 
+
 def _push_history(request: Request, card: dict) -> None:
-    """Save last few generations per playbook, including dimensions."""
     pb = card.get("playbook")
     if not pb:
         return
@@ -347,22 +434,43 @@ def _push_history(request: Request, card: dict) -> None:
     history.setdefault(pb, [])
 
     ex_raw = card.get("_example_raw") or {}
-    history[pb].append({
-        "tips": list(card.get("tips", [])),
-        "before": ex_raw.get("before", ""),
-        "after": ex_raw.get("after", ""),
-        "tips_dimension": card.get("_tips_dimension"),
-        "example_dimension": card.get("_example_dimension"),
-    })
+    history[pb].append(
+        {
+            "tips": list(card.get("tips", [])),
+            "before": ex_raw.get("before", ""),
+            "after": ex_raw.get("after", ""),
+            "tips_dimension": card.get("_tips_dimension"),
+            "example_dimension": card.get("_example_dimension"),
+        }
+    )
 
-    # keep short memory per playbook
     history[pb] = history[pb][-6:]
     set_history(request, history)
 
 
+def _get_active_cv_text(request: Request, db: Session, user_id: int) -> str:
+    cv_id = request.session.get("active_cv_id")
+    if not cv_id:
+        latest = (
+            db.query(CV)
+            .filter(CV.user_id == user_id, CV.raw_text != None)  # noqa: E711
+            .order_by(CV.updated_at.desc())
+            .first()
+        )
+        return latest.raw_text if latest else ""
+
+    cv = db.query(CV).filter(CV.id == cv_id, CV.user_id == user_id).first()
+    return cv.raw_text if cv and cv.raw_text else ""
+
+
 @router.post("/intent", response_class=HTMLResponse)
-async def create_card(request: Request, intent: str = Form(...)):
-    cv_text = request.session.get("uploaded_cv_text", "")
+@observe()
+async def create_card(request: Request, intent: str = Form(...), db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse("/auth?error=login_required", status_code=303)
+
+    cv_text = _get_active_cv_text(request, db, user.id)
 
     playbook = route_intent(intent)
     history = get_history(request)
@@ -380,7 +488,12 @@ async def create_card(request: Request, intent: str = Form(...)):
 
 
 @router.post("/card/variant", response_class=HTMLResponse)
-async def card_variant(request: Request, card_id: str = Form(...)):
+@observe()
+async def card_variant(request: Request, card_id: str = Form(...), db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    if not user:
+        return HTMLResponse("", status_code=401)
+
     cards = get_cards(request)
     cid = str(card_id)
     card = cards.get(cid)
@@ -391,22 +504,19 @@ async def card_variant(request: Request, card_id: str = Form(...)):
     history = get_history(request)
     avoid = history.get(pb, [])
 
-    example_data = await generate_example(
-        pb,
-        request.session.get("uploaded_cv_text", ""),
-        avoid=avoid
-    )
+    cv_text = _get_active_cv_text(request, db, user.id)
+    example_data = await generate_example(pb, cv_text, avoid=avoid)
 
     card["example"] = example_data["html"]
     card["_example_raw"] = {"before": example_data["before"], "after": example_data["after"]}
     card["_example_dimension"] = example_data.get("dimension")
     cards[cid] = card
 
-    # You’re swapping only the innerHTML of #example-{{id}}, so return only the example html
     return HTMLResponse(card["example"])
 
 
 @router.post("/card/accept", response_class=HTMLResponse)
+@observe()
 async def card_accept(request: Request, card_id: str = Form(...)):
     cards = get_cards(request)
     progress = get_progress(request)
@@ -416,7 +526,6 @@ async def card_accept(request: Request, card_id: str = Form(...)):
     if not card:
         return HTMLResponse("", status_code=204)
 
-    # Save what was shown so future generations can avoid it
     _push_history(request, card)
 
     card["subtitle"] = "Marked as done ✓"
@@ -426,7 +535,6 @@ async def card_accept(request: Request, card_id: str = Form(...)):
     pb = card.get("playbook")
     if pb:
         progress["completed"].append(pb)
-        # keep it tidy
         progress["completed"] = progress["completed"][-50:]
         set_progress(request, progress)
 
@@ -434,18 +542,16 @@ async def card_accept(request: Request, card_id: str = Form(...)):
 
 
 @router.delete("/card", response_class=HTMLResponse)
+@observe()
 async def card_delete(request: Request, card_id: str = Query(...)):
     cards = get_cards(request)
     progress = get_progress(request)
 
     cid = str(card_id)
     card = cards.pop(cid, None)
-
-    # If card doesn't exist, just return ok
     if not card:
         return HTMLResponse("", status_code=200)
 
-    # Save to history even if dismissed (so it still avoids repeats)
     _push_history(request, card)
 
     pb = card.get("playbook")
@@ -458,31 +564,33 @@ async def card_delete(request: Request, card_id: str = Query(...)):
 
 
 @router.get("/next-action", response_class=HTMLResponse)
-async def next_best_action(request: Request):
-    progress = get_progress(request)
-    cv_text = request.session.get("uploaded_cv_text", "")
+@observe()
+async def next_best_action(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse("/auth?error=login_required", status_code=303)
 
+    progress = get_progress(request)
     already_done = set(progress.get("completed", []) + progress.get("dismissed", []))
 
     cards = get_cards(request)
     already_open = active_playbooks(cards)
 
     possible = ["impact", "summary", "language", "structure", "skills", "projects", "ats", "formatting", "experience"]
-
     next_focus = next((p for p in possible if p not in already_done and p not in already_open), None)
     if next_focus is None:
         next_focus = next((p for p in possible if p not in already_done), "general")
 
-    # IMPORTANT: use history avoid for that playbook too
     history = get_history(request)
     avoid = history.get(next_focus, [])
+
+    cv_text = _get_active_cv_text(request, db, user.id)
 
     card = await build_card_from_intent(f"improve {next_focus}", cv_text, avoid=avoid)
     card["source"] = "suggested"
 
     cid = str(card["id"])
     card["id"] = cid
-
     cards[cid] = card
 
     progress["suggested"].append(next_focus)
