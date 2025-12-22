@@ -4,6 +4,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const overlay = document.getElementById("loading-overlay");
   const statusUrl = window.location.pathname.replace("/view/", "/status/");
 
+  // --- Page load reveal (skip if overlay is showing) ---
+  const dash = document.querySelector(".cv-dashboard");
+  if (!overlay || overlay.classList.contains("hidden")) {
+    requestAnimationFrame(() => dash?.classList.add("is-loaded"));
+  }
+
   async function checkStatus() {
     try {
       const res = await fetch(statusUrl);

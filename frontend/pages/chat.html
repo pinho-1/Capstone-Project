@@ -4,12 +4,18 @@
 {% endblock %}
 
 {% block content %}
-<section class="chat-app">
+<section class="chat-app {% if is_guest %}is-guest{% endif %}">
+
+  {% if is_guest %}
+  <div class="guest-banner">
+    <strong>Guest Mode</strong> · You can chat, but CV personalization + application tracking require login.
+    <a class="btn primary small" href="/auth">Log in</a>
+  </div>
+  {% endif %}
 
   <!-- Top bar inside the page -->
-  <div class="chat-topbar">
+  <div class="chat-topbar reveal reveal-topbar">
     <div class="chat-topbar-left">
-
       <div class="chat-title">
         <div class="chat-title-row">
           <h2>Shape Your Career. One Conversation at a Time.</h2>
@@ -25,10 +31,10 @@
     </div>
   </div>
 
-  <div class="chat-grid">
+  <div class="chat-grid reveal reveal-grid">
 
     <!-- Left: suggestions -->
-    <aside class="chat-rail" id="chat-rail">
+    <aside class="chat-rail reveal reveal-rail" id="chat-rail">
       <div class="rail-header">
         <div>
           <h4 class="rail-title">Quick actions</h4>
@@ -71,27 +77,25 @@
     </aside>
 
     <!-- Main: chat -->
-    <main class="chat-main">
+    <main class="chat-main reveal reveal-main">
       <div id="chat-messages" class="chat-messages">
-
         <!-- Empty hero state -->
-          <div class="empty-card">
-            <p><strong>Hi {{ user.name }} 👋</strong></p>
-            <p class="muted">Try one of these:</p>
-            <ul>
-              <li>“Help me choose between two job offers.”</li>
-              <li>“Track this application: Company X, Role Y.”</li>
-              <li>“Write a short recruiter message for a Data Analyst role.”</li>
-            </ul>
+        <div class="empty-card reveal reveal-empty">
+          <p><strong>Hi {{ user.name if user else "Guest" }} 👋</strong></p>
+          <p class="muted">Try one of these:</p>
+          <ul>
+            <li>“Help me choose between two job offers.”</li>
+            <li>“Write a short recruiter message for a Data Analyst role.”</li>
+            <li>“Give me a 4-week plan to land an internship.”</li>
+          </ul>
 
-            <div class="empty-cta">
-              <button type="button" class="btn primary small chip" data-suggestion="Help me write a cover letter">
-                Help me write a cover letter
-              </button>
-              <button type="button" class="btn ghost small chip" data-suggestion="List my tracked applications.">
-                Show my applications
-              </button>
-            </div>
+          <div class="empty-cta">
+            <button type="button" class="btn primary small chip" data-suggestion="Help me write a cover letter">
+              Help me write a cover letter
+            </button>
+            <button type="button" class="btn ghost small chip" data-suggestion="List my tracked applications.">
+              Show my applications
+            </button>
           </div>
         </div>
       </div>
@@ -117,5 +121,7 @@
   </div>
 </section>
 
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.5/dist/purify.min.js"></script>
 <script src="{{ url_for('static', path='js/chat.js') }}"></script>
 {% endblock %}

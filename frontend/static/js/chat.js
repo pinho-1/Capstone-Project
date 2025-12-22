@@ -13,6 +13,12 @@ window.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  // --- Page load reveal ---
+  const chatApp = document.querySelector(".chat-app");
+  requestAnimationFrame(() => {
+    chatApp?.classList.add("is-loaded");
+  });
+
   // --- Helpers ---
   function scrollToBottom() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -62,16 +68,23 @@ window.addEventListener("DOMContentLoaded", () => {
     typingEl = null;
   }
 
-  // --- Real Functions ---
+  // --- Functions ---
   function addMessage(text, role, timestamp = "") {
     hideEmptyState();
 
     const wrap = document.createElement("div");
     wrap.className = `msg msg--${role}`;
+    wrap.classList.add("is-new");
+    setTimeout(() => wrap.classList.remove("is-new"), 400);
 
     const bubble = document.createElement("div");
     bubble.className = "bubble";
-    bubble.textContent = text;
+    if (role === "assistant" && window.marked) {
+      const html = marked.parse(text);
+      bubble.innerHTML = window.DOMPurify ? DOMPurify.sanitize(html) : html;
+    } else {
+      bubble.textContent = text;
+    }
 
     const ts = document.createElement("div");
     ts.className = "timestamp";
@@ -88,8 +101,8 @@ window.addEventListener("DOMContentLoaded", () => {
     chatInput.disabled = true;
     sendBtn.disabled = true;
 
-    addTyping(); // ✅ show typing bubble in chat
-
+    addTyping();
+    
     try {
       const formData = new FormData();
       formData.append("message", message);
@@ -103,6 +116,12 @@ window.addEventListener("DOMContentLoaded", () => {
       }
 
       const data = await res.json();
+      // If backend says this feature needs login
+      if (data.requires_login) {
+        addMessage("Guest Mode: log in to unlock that feature.", "assistant");
+        addMessage("You can keep chatting here for general help though.", "assistant");
+        return;
+      }
 
       removeTyping();
 

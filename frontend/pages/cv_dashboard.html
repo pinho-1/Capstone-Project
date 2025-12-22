@@ -12,7 +12,7 @@
   </div>
 
   <!-- Header -->
-  <header class="cv-header grid-layout">
+  <header class="cv-header grid-layout reveal reveal-header">
     <div class="cv-title">
       <h2>Refine Your CV. Redefine Your Career.</h2>
       <p>Let’s transform your CV into your next big opportunity.</p>
@@ -29,9 +29,9 @@
   </header>
 
   <!-- Main grid -->
-  <div class="cv-grid">
+  <div class="cv-grid reveal reveal-grid">
     <!-- Score Panel -->
-    <aside class="cv-score-panel">
+    <aside class="cv-score-panel reveal reveal-left">
       <div class="score-circle">
         <svg viewBox="0 0 100 100">
           <defs>
@@ -79,7 +79,7 @@
     </aside>
 
     <!-- Middle: Mentor Insights -->
-    <section class="cv-insights">
+    <section class="cv-insights reveal reveal-mid">
       <div class="mentor-title">
         <h3>Talentum’s Take on Your CV</h3>
         <p>What’s working, what isn’t, and what to fix next.</p>
@@ -143,7 +143,7 @@
     </section>
 
     <!-- Right: AI Dynamic Mentor Panel -->
-    <aside class="cv-actions-panel" id="ai-panel">
+    <aside class="cv-actions-panel reveal reveal-right" id="ai-panel">
       <div class="panel-head">
         <div>
           <h3>Next Steps</h3>
@@ -176,7 +176,7 @@
 
       <!-- Small helpers -->
       <div class="quick-intents">
-        <!-- turn pills into mini buttons so the style matches -->
+
         <button class="btn secondary small" hx-post="/cv/intent" hx-vals='{"intent":"make my summary punchier"}'
                 hx-target="#cards-stack" hx-swap="beforeend" hx-indicator="#ai-loading">Summary</button>
 

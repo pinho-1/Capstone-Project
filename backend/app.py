@@ -77,10 +77,18 @@ def about_page(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/chat", response_class=HTMLResponse)
 def chat_page(request: Request, db: Session = Depends(get_db)):
-    user = get_current_user(request, db)
-    if not user:
-        return RedirectResponse("/auth?error=login_required", status_code=303)
-    return templates.TemplateResponse("chat.html", {"request": request, "user": user, "current_path": request.url.path,})
+    user = get_current_user(request, db)  # may be None
+
+    return templates.TemplateResponse(
+        "chat.html",
+        {
+            "request": request,
+            "user": user,  # None for guest
+            "is_guest": user is None,
+            "current_path": request.url.path,
+        },
+    )
+
 
 @app.get("/onboarding", response_class=HTMLResponse)
 def onboarding_page(request: Request, db: Session = Depends(get_db)):
@@ -255,7 +263,7 @@ def cv_entry_point(request: Request, db: Session = Depends(get_db)):
         {"request": request, "user": user, "current_path": request.url.path},
     )
 
-#bruno
+# Carrer Match
 @app.get("/cm", response_class=HTMLResponse)
 def career_match_page(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
@@ -274,14 +282,7 @@ def load_mock_jobs():
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-# ---------------------
-app.add_middleware(
-    SessionMiddleware,
-    secret_key=os.getenv("SECRET_KEY", "temporary_secret"),
-    same_site="lax",
-)
-
-# pedro - interviews
+# Interviews
 @app.get("/interviews", response_class=HTMLResponse)
 def interviews_page(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
@@ -293,3 +294,10 @@ def interviews_page(request: Request, db: Session = Depends(get_db)):
         "user": user,
         "current_path": request.url.path
     })
+
+# ---------------------
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SECRET_KEY", "temporary_secret"),
+    same_site="lax",
+)

@@ -386,9 +386,10 @@ body {
   border: 1px solid rgba(46,106,132,0.18);
 }
 
-.bubble ul { margin: 8px 0 0; padding-left: 18px; }
 .bubble p { margin: 0 0 8px; }
 .bubble p:last-child { margin-bottom: 0; }
+.bubble ul, .bubble ol { margin: 8px 0 0; padding-left: 18px; }
+.bubble li { margin: 4px 0; }
 
 .timestamp {
   font-size: 12px;
@@ -496,3 +497,72 @@ body {
     right: 95px;
   }
 }
+
+/* =========================
+   Page load animations
+   ========================= */
+
+/* Initial hidden state (only while JS hasn't marked as loaded) */
+.chat-app:not(.is-loaded) .reveal {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* When loaded, animate in */
+.chat-app.is-loaded .reveal {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity .55s ease, transform .55s ease;
+}
+
+/* Staggering */
+.chat-app.is-loaded .reveal-topbar { transition-delay: 0.05s; }
+.chat-app.is-loaded .reveal-grid   { transition-delay: 0.12s; }
+.chat-app.is-loaded .reveal-rail   { transition-delay: 0.18s; }
+.chat-app.is-loaded .reveal-main   { transition-delay: 0.22s; }
+.chat-app.is-loaded .reveal-empty  { transition-delay: 0.30s; }
+
+/* A tiny “pop” for the empty card */
+.chat-app.is-loaded .reveal-empty {
+  transform: translateY(0) scale(1);
+}
+.chat-app:not(.is-loaded) .reveal-empty {
+  transform: translateY(14px) scale(0.98);
+}
+
+/* Reduced motion: don't be evil */
+@media (prefers-reduced-motion: reduce) {
+  .chat-app:not(.is-loaded) .reveal,
+  .chat-app.is-loaded .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+.msg.is-new {
+  animation: msgIn .25s ease both;
+}
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.guest-banner{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 10px 14px;
+  border-radius: 14px;
+
+  background: rgba(255,255,255,0.65);
+  border: 1px solid rgba(46,106,132,0.14);
+
+  color: rgba(29,42,51,0.75);
+  font-size: 0.9rem;
+}
+.guest-banner .btn{ flex: 0 0 auto; }
+
+
