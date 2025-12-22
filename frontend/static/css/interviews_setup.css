@@ -1,94 +1,171 @@
 /* ================================
-   GENERAL LAYOUT
+   PAGE WRAPPER
 ================================ */
 
 .interview-container {
-  max-width: 1100px;
-  margin: 140px auto 60px auto;
-  padding: 20px;
+  max-width: 1080px;
+  margin: 120px auto 70px auto;
+  padding: 26px;
+
   font-family: "Inter", sans-serif;
-  color: #111827;
-}
+  color: #0f172a;
 
-.interview-title {
-  font-size: 2rem;
-  font-weight: 600;
-  font-family: "Poppins", sans-serif;
-  color: #2e6a84;
-  margin-bottom: 4px;
-}
-
-.interview-subtitle {
-  font-size: 1rem;
-  color: #4b5563;
-  margin-bottom: 25px;
+  /* soft background glow */
+  background:
+    radial-gradient(900px 520px at 12% 0%, rgba(46, 106, 132, 0.14), transparent 60%),
+    radial-gradient(780px 520px at 92% 10%, rgba(99, 102, 241, 0.10), transparent 55%),
+    radial-gradient(720px 480px at 40% 100%, rgba(34, 197, 94, 0.07), transparent 55%);
+  border-radius: 26px;
 }
 
 /* ================================
-   CARD STYLING
+   HEADER
+================================ */
+
+.interview-title {
+  font-size: 2.2rem;
+  font-weight: 750;
+  font-family: "Poppins", sans-serif;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px 0;
+  color: #0f172a;
+
+  transition: transform 0.25s ease, color 0.25s ease, text-shadow 0.25s ease;
+}
+
+.interview-title:hover {
+  color: #2e6a84;
+  transform: translateY(-2px);
+  text-shadow: 0 16px 40px rgba(46, 106, 132, 0.18);
+}
+
+.interview-subtitle {
+  margin: 0 0 22px 0;
+  color: #475569;
+  max-width: 65ch;
+  line-height: 1.55;
+}
+
+/* ================================
+   SETUP CARD
 ================================ */
 
 .setup-card {
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 18px;
-  padding: 22px 25px;
-  margin-bottom: 30px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-  animation: fadeIn 0.5s ease forwards;
+  position: relative;
+  overflow: hidden;
+
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(18px) saturate(170%);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 22px;
+
+  padding: 22px 22px 20px 22px;
+
+  box-shadow:
+    0 22px 65px rgba(15, 23, 42, 0.12),
+    0 2px 0 rgba(255, 255, 255, 0.5) inset;
+
+  animation: liftIn 0.55s ease both;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.setup-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(46, 106, 132, 0.34);
+  box-shadow:
+    0 28px 80px rgba(15, 23, 42, 0.14),
+    0 2px 0 rgba(255, 255, 255, 0.55) inset;
+}
+
+.setup-card::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background:
+    radial-gradient(520px 230px at 20% 0%, rgba(46, 106, 132, 0.16), transparent 60%),
+    radial-gradient(520px 260px at 100% 30%, rgba(99, 102, 241, 0.12), transparent 55%);
+  pointer-events: none;
 }
 
 .setup-card h2 {
-  font-size: 1.3rem;
-  font-weight: 600;
+  position: relative;
+  font-size: 1.35rem;
+  font-weight: 700;
   font-family: "Poppins", sans-serif;
   color: #2e6a84;
-  margin-bottom: 12px;
+  margin: 0 0 14px 0;
 }
 
-/* Small fade animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+@keyframes liftIn {
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ================================
-   LABELS & INPUTS
+   FORM STRUCTURE
+================================ */
+
+#interview-form {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+/* ================================
+   LABELS
 ================================ */
 
 label {
   display: block;
-  margin-top: 14px;
-  margin-bottom: 6px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #2e6a84;
+  margin: 0 0 6px 0;
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: #1f4f63;
 }
+
+/* ================================
+   INPUTS
+================================ */
 
 select,
 input[type="text"] {
   width: 100%;
-  padding: 11px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(46, 106, 132, 0.25);
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  font-size: 0.9rem;
-  color: #111827;
-  transition: border 0.2s ease, background 0.2s ease;
+  height: 46px;
+  padding: 0 14px;
+
+  border-radius: 14px;
+  border: 1px solid rgba(46, 106, 132, 0.22);
+  background: rgba(255, 255, 255, 0.80);
+
+  font-size: 0.95rem;
+  color: #0f172a;
+
+  outline: none;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease;
+}
+
+select:hover,
+input[type="text"]:hover {
+  transform: translateY(-1px);
+  border-color: rgba(46, 106, 132, 0.38);
 }
 
 select:focus,
 input[type="text"]:focus {
-  border-color: #2e6a84;
-  background: rgba(255, 255, 255, 0.9);
-  outline: none;
+  border-color: rgba(46, 106, 132, 0.65);
+  background: rgba(255, 255, 255, 0.93);
+  box-shadow: 0 0 0 6px rgba(46, 106, 132, 0.12);
+  transform: translateY(-1px);
 }
 
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 
 /* ================================
    TOGGLE GROUPS
@@ -97,30 +174,42 @@ input[type="text"]:focus {
 .toggle-group {
   display: flex;
   gap: 10px;
-  margin-top: 4px;
+  flex-wrap: wrap;
 }
 
 .toggle-group button {
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: 1.5px solid rgba(46, 106, 132, 0.25);
-  background: rgba(255, 255, 255, 0.65);
+  height: 38px;
+  padding: 0 14px;
+
+  border-radius: 999px;
+  border: 1.5px solid rgba(46, 106, 132, 0.24);
+
+  background: rgba(255, 255, 255, 0.72);
   color: #2e6a84;
-  font-weight: 500;
+
+  font-weight: 750;
+  font-family: "Poppins", sans-serif;
+
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .toggle-group button:hover {
-  background: rgba(46, 106, 132, 0.12);
+  transform: translateY(-1px);
+  background: rgba(46, 106, 132, 0.10);
+  border-color: rgba(46, 106, 132, 0.35);
 }
 
 .toggle-group button.active {
-  background: #2e6a84;
+  background: rgba(46, 106, 132, 0.94);
   color: white;
-  border-color: #2e6a84;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(46, 106, 132, 0.25);
+  border-color: rgba(46, 106, 132, 0.94);
+  box-shadow: 0 14px 30px rgba(46, 106, 132, 0.18);
 }
 
 /* ================================
@@ -128,25 +217,49 @@ input[type="text"]:focus {
 ================================ */
 
 .primary-btn {
-  background: #2e6a84;
-  color: white;
+  height: 46px;
+  border-radius: 14px;
   border: none;
-  padding: 11px 18px;
-  border-radius: 10px;
-  font-weight: 600;
+
+  background: rgba(46, 106, 132, 0.96);
+  color: white;
+
+  font-weight: 850;
   font-family: "Poppins", sans-serif;
+
   cursor: pointer;
-  margin-top: 20px;
-  transition: all 0.25s ease;
+  margin-top: 6px;
+
+  box-shadow: 0 18px 38px rgba(46, 106, 132, 0.18);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
 }
 
 .primary-btn:hover {
-  background: #0a5473;
-  transform: translateY(-1px);
-  box-shadow: 0 3px 6px rgba(46, 106, 132, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 24px 52px rgba(46, 106, 132, 0.22);
+  filter: brightness(1.03);
 }
 
+.primary-btn:active { transform: translateY(-1px); }
+
 .primary-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.55;
   cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ================================
+   MOBILE
+================================ */
+
+@media (max-width: 640px) {
+  .interview-container {
+    margin-top: 95px;
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .interview-title {
+    font-size: 1.9rem;
+  }
 }

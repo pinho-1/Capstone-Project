@@ -13,6 +13,10 @@ from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
 import os
 import json
+from backend.routers.interviews_api import router as interviews_api_router
+import uuid
+
+
 
 load_dotenv()
 
@@ -32,6 +36,8 @@ templates = Jinja2Templates(directory=os.path.join(FRONTEND_DIR, "pages"))
 # Include routers
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(cv.router, prefix="/cv", tags=["cv"])
+app.include_router(interviews_api_router)
+
 
 # Get Path
 def get_current_path(request: Request):
@@ -402,8 +408,6 @@ def interviews_setup_page(request: Request, db: Session = Depends(get_db)):
         },
     )
 
-
-# --- INTERVIEWS: SESSION PAGE (VOICE) ---
 @app.post("/interviews/session", response_class=HTMLResponse)
 async def interviews_session_page(
     request: Request,
@@ -417,7 +421,8 @@ async def interviews_session_page(
     if not user:
         return RedirectResponse("/auth?error=login_required", status_code=303)
 
-    # later: here is where you'll actually "prepare" questions with the LLM
+    # ✅ CREATE SESSION ID HERE
+    session_id = str(uuid.uuid4())
 
     return templates.TemplateResponse(
         "interviews_session.html",
@@ -429,5 +434,6 @@ async def interviews_session_page(
             "seniority": seniority,
             "language": language,
             "question_count": question_count,
+            "session_id": session_id,  # ✅ PASS TO TEMPLATE
         },
     )

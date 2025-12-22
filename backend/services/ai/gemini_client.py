@@ -25,3 +25,12 @@ async def generate_json(system_prompt: str, user_payload: dict) -> dict:
     except Exception as e:
         print("Gemini error:", e)
         return {"error": str(e)}
+    
+async def generate_text(system_prompt: str, user_text: str) -> str:
+    try:
+        model = _model(system_prompt)
+        resp = model.generate_content(user_text)
+        return (resp.text or "").strip()
+    except Exception as e:
+        print("Gemini error:", e)
+        return "Sorry, I had an issue generating a response. Try again."

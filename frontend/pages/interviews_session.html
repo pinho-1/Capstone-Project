@@ -1,12 +1,11 @@
 {% extends "base.html" %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', path='/css/interviews_session.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='/css/interviews_session.css') }}?v=2">
 {% endblock %}
 
 {% block content %}
 <div class="interview-container">
-
   <h1 class="interview-title">Mock Interviews</h1>
 
   <p class="interview-subtitle">
@@ -14,57 +13,85 @@
     ({{ seniority|capitalize }} · {{ 'English' if language == 'en' else 'Português' }}).
   </p>
 
-  <!-- VOICE INTERVIEW PANEL -->
   <section class="interview-card">
-    <h2>Voice Interview</h2>
-    <p class="interview-description">
-      Once the session is ready, press the microphone and speak naturally.
-      Talentum's AI recruiter will ask you questions and listen to your answers.
-    </p>
+    <div class="text-status-row">
+      <span class="text-status-dot" id="text-status-dot"></span>
+      <span id="interview-status">Preparing your interview…</span>
+    </div>
 
-    <div class="voice-panel">
-      <div class="voice-status-row">
-        <span class="voice-status-dot" id="voice-status-dot"></span>
-        <span id="interview-status">
-          Preparing your {{ role }} interview…
-        </span>
-      </div>
-
-      <button class="mic-button" id="voice-toggle-btn" disabled>
-        <span class="mic-icon">🎙️</span>
-        <span class="mic-label">
-          {{ 'Start voice session' if language == 'en' else 'Iniciar sessão de voz' }}
-        </span>
+    <div class="session-actions">
+      <button class="primary-btn" id="start-text-btn" type="button" disabled>
+        {{ 'Start session' if language == 'en' else 'Iniciar sessão' }}
       </button>
 
-      <div class="ai-voice-visualizer">
-        <div class="ai-circle" id="ai-circle"></div>
-        <p class="ai-label">AI voice</p>
+      <button class="secondary-btn" id="reset-btn" type="button" disabled>
+        {{ 'Reset' if language == 'en' else 'Reiniciar' }}
+      </button>
+    </div>
+
+    <div class="chat-panel" id="chat-panel">
+      <div class="chat-messages" id="chat-messages"></div>
+
+      <div class="typing-row" id="typing-row" hidden>
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
       </div>
 
-      <p class="voice-note">
-        When ElevenLabs is connected, this button will start and pause the real-time voice interview.
-      </p>
+      <form id="chat-form" class="chat-form" autocomplete="off">
+        <input
+          id="chat-input"
+          type="text"
+          placeholder="{{ 'Type your answer…' if language == 'en' else 'Escreve a tua resposta…' }}"
+          disabled
+        />
+        <button id="send-btn" type="submit" class="primary-btn" disabled>
+          {{ 'Send' if language == 'en' else 'Enviar' }}
+        </button>
+      </form>
 
-      <!-- Placeholder for the real ElevenLabs / audio widget -->
-      <div class="voice-widget-placeholder">
-        <p>ElevenLabs voice widget will appear here.</p>
+      <!-- ✅ RESULTS PANEL (hidden until done) -->
+      <div class="results-panel" id="results-panel" hidden>
+        <div class="results-card">
+          <div class="results-emoji" id="results-emoji">🎯</div>
+
+          <div class="results-title" id="results-title">
+            {{ 'Interview Results' if language == 'en' else 'Resultado da Entrevista' }}
+          </div>
+
+          <div class="results-score">
+            <span class="results-score-num" id="results-score-num">0</span>
+            <span class="results-score-den">/100</span>
+          </div>
+
+          <div class="results-sub" id="results-sub">
+            {{ "Here's what to improve next time." if language == 'en' else 'Aqui vai o que podes melhorar para a próxima.' }}
+          </div>
+
+          <ul class="results-feedback" id="results-feedback"></ul>
+
+          <div class="results-actions">
+            <button type="button" class="secondary-btn" id="results-restart-btn">
+              {{ 'Restart' if language == 'en' else 'Reiniciar' }}
+            </button>
+          </div>
+        </div>
       </div>
+      <!-- /RESULTS PANEL -->
     </div>
   </section>
-
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  // config coming from FastAPI (your route)
   window.INTERVIEW_CONFIG = {
     role: "{{ role }}",
     seniority: "{{ seniority }}",
     language: "{{ language }}",
-    questionCount: {{ question_count }}
+    questionCount: {{ question_count }},
+    sessionId: "{{ session_id }}"
   };
 </script>
-<script src="{{ url_for('static', path='/js/interviews_session.js') }}"></script>
+<script src="{{ url_for('static', path='/js/interviews_session.js') }}?v=2"></script>
 {% endblock %}
