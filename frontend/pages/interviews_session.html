@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/interviews_session.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="interview-container">
+
+  <h1 class="interview-title">Mock Interviews</h1>
+
+  <p class="interview-subtitle">
+    {{ question_count }} questions for {{ role }}
+    ({{ seniority|capitalize }} · {{ 'English' if language == 'en' else 'Português' }}).
+  </p>
+
+  <!-- VOICE INTERVIEW PANEL -->
+  <section class="interview-card">
+    <h2>Voice Interview</h2>
+    <p class="interview-description">
+      Once the session is ready, press the microphone and speak naturally.
+      Talentum's AI recruiter will ask you questions and listen to your answers.
+    </p>
+
+    <div class="voice-panel">
+      <div class="voice-status-row">
+        <span class="voice-status-dot" id="voice-status-dot"></span>
+        <span id="interview-status">
+          Preparing your {{ role }} interview…
+        </span>
+      </div>
+
+      <button class="mic-button" id="voice-toggle-btn" disabled>
+        <span class="mic-icon">🎙️</span>
+        <span class="mic-label">
+          {{ 'Start voice session' if language == 'en' else 'Iniciar sessão de voz' }}
+        </span>
+      </button>
+
+      <div class="ai-voice-visualizer">
+        <div class="ai-circle" id="ai-circle"></div>
+        <p class="ai-label">AI voice</p>
+      </div>
+
+      <p class="voice-note">
+        When ElevenLabs is connected, this button will start and pause the real-time voice interview.
+      </p>
+
+      <!-- Placeholder for the real ElevenLabs / audio widget -->
+      <div class="voice-widget-placeholder">
+        <p>ElevenLabs voice widget will appear here.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // config coming from FastAPI (your route)
+  window.INTERVIEW_CONFIG = {
+    role: "{{ role }}",
+    seniority: "{{ seniority }}",
+    language: "{{ language }}",
+    questionCount: {{ question_count }}
+  };
+</script>
+<script src="{{ url_for('static', path='/js/interviews_session.js') }}"></script>
+{% endblock %}

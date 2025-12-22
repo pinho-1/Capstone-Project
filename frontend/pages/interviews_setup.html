@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/interviews.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="interview-container">
+
+  <h1 class="interview-title">Mock Interviews</h1>
+  <p class="interview-subtitle">
+    Practice real interviews with Talentum’s voice recruiter, powered by ElevenLabs.
+  </p>
+
+  <!-- SETUP PANEL -->
+  <section class="setup-card">
+    <h2>Interview Setup</h2>
+
+    <!-- IMPORTANT: This POSTs into /interviews/session -->
+    <form id="interview-form" method="post" action="{{ url_for('interviews_session_page') }}">
+
+      <!-- JOB ROLE -->
+      <label>Job Role</label>
+      <select id="role-select">
+        <option value="data_analyst">Data Analyst</option>
+        <option value="data_scientist">Data Scientist</option>
+        <option value="custom">Other (type manually)</option>
+      </select>
+
+      <input type="text" id="custom-role"
+             placeholder="Enter job role..."
+             class="hidden">
+
+      <!-- Hidden field that actually gets POSTed -->
+      <input type="hidden" name="job_role" id="job-role-input" value="Data Analyst">
+
+      <!-- SENIORITY -->
+      <label>Seniority Level</label>
+      <div class="toggle-group" id="seniority-group">
+        <button type="button" data-value="junior" class="active">Junior</button>
+        <button type="button" data-value="mid">Mid</button>
+        <button type="button" data-value="senior">Senior</button>
+      </div>
+      <input type="hidden" name="seniority" id="seniority-input" value="junior">
+
+      <!-- LANGUAGE -->
+      <label>Language</label>
+      <div class="toggle-group" id="language-group">
+        <button type="button" data-value="en" class="active">English</button>
+        <button type="button" data-value="pt">Português</button>
+      </div>
+      <input type="hidden" name="language" id="language-input" value="en">
+
+      <!-- QUESTION COUNT -->
+      <label>Number of Questions</label>
+      <select id="question-count" name="question_count">
+        <option value="5">5</option>
+        <option value="8" selected>8 (recommended)</option>
+        <option value="10">10</option>
+      </select>
+
+      <!-- SUBMIT -->
+      <button class="primary-btn" type="submit" id="start-btn">
+        Prepare Interview
+      </button>
+    </form>
+
+  </section>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', path='/js/interviews_setup.js') }}"></script>
+{% endblock %}

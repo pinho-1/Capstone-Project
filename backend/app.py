@@ -386,14 +386,48 @@ async def cm_analyze(
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "temporary_secret"))
 
 # pedro - interviews
+# --- INTERVIEWS: SETUP PAGE ---
 @app.get("/interviews", response_class=HTMLResponse)
-def interviews_page(request: Request, db: Session = Depends(get_db)):
+def interviews_setup_page(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
     if not user:
         return RedirectResponse("/auth?error=login_required", status_code=303)
 
-    return templates.TemplateResponse("interviews.html", {
-        "request": request,
-        "user": user,
-        "current_path": request.url.path
-    })
+    return templates.TemplateResponse(
+        "interviews_setup.html",      # new template name
+        {
+            "request": request,
+            "user": user,
+            "current_path": request.url.path,
+        },
+    )
+
+
+# --- INTERVIEWS: SESSION PAGE (VOICE) ---
+@app.post("/interviews/session", response_class=HTMLResponse)
+async def interviews_session_page(
+    request: Request,
+    db: Session = Depends(get_db),
+    job_role: str = Form(...),
+    seniority: str = Form(...),
+    language: str = Form(...),
+    question_count: int = Form(...),
+):
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse("/auth?error=login_required", status_code=303)
+
+    # later: here is where you'll actually "prepare" questions with the LLM
+
+    return templates.TemplateResponse(
+        "interviews_session.html",
+        {
+            "request": request,
+            "user": user,
+            "current_path": request.url.path,
+            "role": job_role,
+            "seniority": seniority,
+            "language": language,
+            "question_count": question_count,
+        },
+    )

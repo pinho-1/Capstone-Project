@@ -1,0 +1,152 @@
+/* ================================
+   GENERAL LAYOUT
+================================ */
+
+.interview-container {
+  max-width: 1100px;
+  margin: 140px auto 60px auto;
+  padding: 20px;
+  font-family: "Inter", sans-serif;
+  color: #111827;
+}
+
+.interview-title {
+  font-size: 2rem;
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+  color: #2e6a84;
+  margin-bottom: 4px;
+}
+
+.interview-subtitle {
+  font-size: 1rem;
+  color: #4b5563;
+  margin-bottom: 25px;
+}
+
+/* ================================
+   CARD STYLING
+================================ */
+
+.setup-card {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 18px;
+  padding: 22px 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.setup-card h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+  color: #2e6a84;
+  margin-bottom: 12px;
+}
+
+/* Small fade animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ================================
+   LABELS & INPUTS
+================================ */
+
+label {
+  display: block;
+  margin-top: 14px;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #2e6a84;
+}
+
+select,
+input[type="text"] {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(46, 106, 132, 0.25);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  font-size: 0.9rem;
+  color: #111827;
+  transition: border 0.2s ease, background 0.2s ease;
+}
+
+select:focus,
+input[type="text"]:focus {
+  border-color: #2e6a84;
+  background: rgba(255, 255, 255, 0.9);
+  outline: none;
+}
+
+.hidden {
+  display: none;
+}
+
+/* ================================
+   TOGGLE GROUPS
+================================ */
+
+.toggle-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.toggle-group button {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(46, 106, 132, 0.25);
+  background: rgba(255, 255, 255, 0.65);
+  color: #2e6a84;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.toggle-group button:hover {
+  background: rgba(46, 106, 132, 0.12);
+}
+
+.toggle-group button.active {
+  background: #2e6a84;
+  color: white;
+  border-color: #2e6a84;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(46, 106, 132, 0.25);
+}
+
+/* ================================
+   PRIMARY BUTTON
+================================ */
+
+.primary-btn {
+  background: #2e6a84;
+  color: white;
+  border: none;
+  padding: 11px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: all 0.25s ease;
+}
+
+.primary-btn:hover {
+  background: #0a5473;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(46, 106, 132, 0.25);
+}
+
+.primary-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
