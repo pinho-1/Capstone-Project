@@ -1,7 +1,8 @@
-# backend/services/ai/interviews_agent.py
 from __future__ import annotations
 
 from typing import Any, Dict, List
+
+from langfuse import observe
 
 from backend.services.ai.gemini_client import generate_json
 
@@ -11,32 +12,27 @@ def _language_name(lang: str) -> str:
 
 
 def _turn_instruction(turn_index: int, total_turns: int, lang: str) -> str:
-    # We want: ONE recruiter reply per user message.
-    # For turn < total: ask a follow-up and continue.
-    # For final turn: close interview and ask for final evaluation (but we’ll evaluate in a separate call).
     if turn_index < total_turns:
-        if _language_name(lang) == "Portuguese":
-            return (
-                "Write ONE recruiter message. It must be a natural follow-up question based on the user's last answer "
-                "and the role/seniority. Do NOT include numbered questions like Q2/5. Do NOT end the interview."
-            )
         return (
             "Write ONE recruiter message. It must be a natural follow-up question based on the user's last answer "
             "and the role/seniority. Do NOT include numbered questions like Q2/5. Do NOT end the interview."
         )
 
-    # last turn
-    if _language_name(lang) == "Portuguese":
-        return (
-            "Write ONE final recruiter message that politely concludes the interview. "
-            "Do NOT include a score here (score is computed separately)."
-        )
     return (
         "Write ONE final recruiter message that politely concludes the interview. "
         "Do NOT include a score here (score is computed separately)."
     )
 
 
+def _safe_str(x: Any) -> str:
+    return str(x or "").strip()
+
+
+def _safe_bool(x: Any) -> bool:
+    return bool(x) if isinstance(x, (bool, int)) else str(x).strip().lower() in {"true", "1", "yes"}
+
+
+@observe()
 async def generate_interview_reply(
     role: str,
     seniority: str,
@@ -46,13 +42,6 @@ async def generate_interview_reply(
     history: List[Dict[str, str]],
     user_message: str,
 ) -> Dict[str, Any]:
-    """
-    Returns JSON:
-      {
-        "reply": "...",
-        "done": bool
-      }
-    """
     sys = f"""
 You are a strict mock-interview recruiter for the role: {role} (seniority: {seniority}).
 Language: {_language_name(language)}.
@@ -66,46 +55,36 @@ Rules:
 - Be consistent with the user's last answer and the role.
 """
 
-    instruction = _turn_instruction(turn_index, total_turns, language)
-
     payload = {
-        "instruction": instruction,
-        "turn_index": turn_index,
-        "total_turns": total_turns,
-        "history": history[-12:],  # keep prompt small
+        "instruction": _turn_instruction(turn_index, total_turns, language),
+        "turn_index": int(turn_index),
+        "total_turns": int(total_turns),
+        "history": history[-12:],
         "last_user_message": user_message,
     }
 
-    out = await generate_json(sys, payload)
+    out = await generate_json(sys, payload, temperature=0.4)
 
-    reply = (out.get("reply") or "").strip()
-    done = bool(out.get("done", False))
+    reply = _safe_str(out.get("reply")) if isinstance(out, dict) else ""
+    done = _safe_bool(out.get("done")) if isinstance(out, dict) else False
 
-    # safety fallback
     if not reply:
         reply = "Thanks. Could you expand on that with a concrete example?"
         done = False
 
-    # if it's the last turn, force done
-    if turn_index >= total_turns:
+    if int(turn_index) >= int(total_turns):
         done = True
 
     return {"reply": reply, "done": done}
 
 
+@observe()
 async def evaluate_interview(
     role: str,
     seniority: str,
     language: str,
     history: List[Dict[str, str]],
 ) -> Dict[str, Any]:
-    """
-    Returns JSON:
-      {
-        "final_score": int (0..100),
-        "feedback": [string, ...]
-      }
-    """
     sys = f"""
 You are evaluating a mock interview for role: {role} (seniority: {seniority}).
 Language of feedback: {_language_name(language)}.
@@ -121,16 +100,19 @@ Rules:
 """
 
     payload = {
-        "history": history,  # full chat
+        "history": history,
         "rubric": ["clarity", "relevance", "specificity", "structure", "role_fit"],
     }
 
-    out = await generate_json(sys, payload)
+    out = await generate_json(sys, payload, temperature=0.2)
 
-    score = out.get("final_score")
-    feedback = out.get("feedback")
+    score = None
+    feedback = None
 
-    # hard safety
+    if isinstance(out, dict):
+        score = out.get("final_score")
+        feedback = out.get("feedback")
+
     try:
         score = int(score)
     except Exception:
@@ -138,15 +120,18 @@ Rules:
 
     score = max(0, min(100, score))
 
-    if not isinstance(feedback, list) or not feedback:
-        feedback = [
-            "Solid overall communication, but increase specificity.",
-            "Use more concrete examples and measurable impact.",
-            "Keep answers structured (Situation, Task, Action, Result).",
-            "Tie your experience more directly to the role requirements.",
-        ]
+    if not isinstance(feedback, list):
+        feedback = []
 
-    # keep feedback concise strings
-    feedback = [str(x).strip() for x in feedback if str(x).strip()][:6]
+    feedback = [str(x).strip() for x in feedback if str(x).strip()]
+
+    if len(feedback) < 4:
+        feedback = [
+            "Good baseline, but increase specificity with concrete examples.",
+            "Use a clearer structure (Situation, Task, Action, Result).",
+            "Tie each answer directly to the role’s responsibilities.",
+            "Quantify impact when possible (time saved, revenue, accuracy, scale).",
+        ]
+    feedback = feedback[:6]
 
     return {"final_score": score, "feedback": feedback}

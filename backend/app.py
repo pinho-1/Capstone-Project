@@ -333,41 +333,11 @@ def interviews_setup_page(request: Request, db: Session = Depends(get_db)):
         return RedirectResponse("/auth?error=login_required", status_code=303)
 
     return templates.TemplateResponse(
-        "interviews_setup.html",      # new template name
+        "interviews_setup.html",
         {
             "request": request,
             "user": user,
             "current_path": request.url.path,
-        },
-    )
-
-@app.post("/interviews/session", response_class=HTMLResponse)
-async def interviews_session_page(
-    request: Request,
-    db: Session = Depends(get_db),
-    job_role: str = Form(...),
-    seniority: str = Form(...),
-    language: str = Form(...),
-    question_count: int = Form(...),
-):
-    user = get_current_user(request, db)
-    if not user:
-        return RedirectResponse("/auth?error=login_required", status_code=303)
-
-    # ✅ CREATE SESSION ID HERE
-    session_id = str(uuid.uuid4())
-
-    return templates.TemplateResponse(
-        "interviews_session.html",
-        {
-            "request": request,
-            "user": user,
-            "current_path": request.url.path,
-            "role": job_role,
-            "seniority": seniority,
-            "language": language,
-            "question_count": question_count,
-            "session_id": session_id,  # ✅ PASS TO TEMPLATE
         },
     )
 
